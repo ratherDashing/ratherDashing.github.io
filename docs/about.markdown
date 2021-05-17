@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-Style Pockets About
+Style Pockets About Page
