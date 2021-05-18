@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Welcome to Style Pockets!"
-date:   2021-05-17 08:41:14 -0400
-categories: style pockets
+title:  "Spring Dress!"
+date:   2021-05-18 19:47:14 -0400
+categories: stylepockets, spring, dress
 ---
-Hello!
+This was the first dress design that we made.  The dress is special.  The secret is in the pockets.  Here is a picture of my dress.
 <img src="{{site.baseurl}}/assets/images/springdress.jpg">
