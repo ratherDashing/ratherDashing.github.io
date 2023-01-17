@@ -53,3 +53,5 @@ plugins:
 # Charlie and Phillip
 kramdown:
   hard_wrap: true
+
+future: true
