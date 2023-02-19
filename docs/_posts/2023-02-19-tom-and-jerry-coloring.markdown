@@ -11,5 +11,3 @@ This is Tom.
 The next one is Jerry.
 
 <img src="{{site.baseurl}}/assets/images/jerry.jpg">
-
-Just like me and Phillip.
