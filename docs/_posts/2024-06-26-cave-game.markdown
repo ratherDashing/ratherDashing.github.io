@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Cave Game"
-date:   2024-06-26 17:00:00 -0400
+date:   2024-06-26 17:01:00 -0400
 categories: Games
 ---
 ## Cave Game
@@ -24,8 +24,8 @@ categories: Games
         const scoreElement = document.getElementById('score');
         const inventoryElement = document.getElementById('inventory');
 
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
 
         let score = 0;
         let cameraX = 0;
@@ -370,11 +370,6 @@ categories: Games
         const jumpBtn = document.getElementById('jumpBtn');
         const rightBtn = document.getElementById('rightBtn');
 
-        // Make sure to include the touch control event listeners at the end:
-        const leftBtn = document.getElementById('leftBtn');
-        const jumpBtn = document.getElementById('jumpBtn');
-        const rightBtn = document.getElementById('rightBtn');
-
         leftBtn.addEventListener('touchstart', () => keys.ArrowLeft = true);
         leftBtn.addEventListener('touchend', () => keys.ArrowLeft = false);
         rightBtn.addEventListener('touchstart', () => keys.ArrowRight = true);
@@ -382,7 +377,6 @@ categories: Games
         jumpBtn.addEventListener('touchstart', () => keys.ArrowUp = true);
         jumpBtn.addEventListener('touchend', () => keys.ArrowUp = false);
 
-        // Prevent default touch behavior
         document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
         gameLoop();
