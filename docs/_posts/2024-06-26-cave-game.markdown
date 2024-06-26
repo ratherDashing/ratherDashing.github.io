@@ -19,13 +19,13 @@ categories: Games
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const canvas = document.getElementById('gameCanvas');
+    const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const inventoryElement = document.getElementById('inventory');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
 
         let score = 0;
         let cameraX = 0;
