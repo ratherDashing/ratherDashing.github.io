@@ -7,7 +7,10 @@ categories: Games
 
 # Crocodile Apple Game
 
-A simple game where you control a crocodile trying to eat apples. Use the arrow keys to move!
+A simple game where you control a crocodile trying to eat apples. Use arrow keys on desktop or touch the directional buttons on mobile!
+
+<!-- Ensure proper mobile rendering -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <div id="crocodile-game-root"></div>
 
@@ -21,6 +24,10 @@ A simple game where you control a crocodile trying to eat apples. Use the arrow 
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .score {
@@ -36,6 +43,14 @@ A simple game where you control a crocodile trying to eat apples. Use the arrow 
   border-radius: 0.5rem;
   overflow: hidden;
   border: 4px solid #276749;
+}
+
+/* Mobile responsive game area */
+@media (max-width: 480px) {
+  .game-area {
+    width: 320px;
+    height: 260px;
+  }
 }
 
 .game-background {
@@ -63,10 +78,56 @@ A simple game where you control a crocodile trying to eat apples. Use the arrow 
   padding: 0 0.5rem;
   border-radius: 0.25rem;
 }
+
+/* Mobile controls */
+.mobile-controls {
+  display: none;
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .mobile-controls {
+    display: grid;
+  }
+  .instructions {
+    display: none;
+  }
+}
+
+.control-button {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 25px;
+  background-color: #276749;
+  color: white;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.control-button:active {
+  opacity: 1;
+}
+
+.control-up { grid-area: up; }
+.control-down { grid-area: down; }
+.control-left { grid-area: left; }
+.control-right { grid-area: right; }
 </style>
 
 <script type="text/babel">
-// Prevents Liquid template engine from interpreting JavaScript template literals
 // {% raw %}
 const CrocodileAppleGame = () => {
   const [crocodilePos, setCrocodilePos] = React.useState({ x: 50, y: 50 });
@@ -75,40 +136,65 @@ const CrocodileAppleGame = () => {
   const [jawAngle, setJawAngle] = React.useState(0);
   const [direction, setDirection] = React.useState('right');
   const [score, setScore] = React.useState(0);
+  const [isMobile, setIsMobile] = React.useState(false);
   
+  // Detect mobile devices
   React.useEffect(() => {
+    setIsMobile(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+  }, []);
+  
+  const moveCharacter = React.useCallback((moveType) => {
     const moveSpeed = 8;
+    const maxX = isMobile ? 280 : 340;
+    const maxY = isMobile ? 200 : 240;
     
-    const handleKeyPress = (e) => {
-      const newPos = { ...crocodilePos };
+    setCrocodilePos(prev => {
+      const newPos = { ...prev };
       let newDirection = direction;
       
-      switch(e.key) {
-        case 'ArrowUp':
+      switch(moveType) {
+        case 'up':
           newPos.y = Math.max(40, newPos.y - moveSpeed);
           break;
-        case 'ArrowDown':
-          newPos.y = Math.min(240, newPos.y + moveSpeed);
+        case 'down':
+          newPos.y = Math.min(maxY, newPos.y + moveSpeed);
           break;
-        case 'ArrowLeft':
+        case 'left':
           newPos.x = Math.max(40, newPos.x - moveSpeed);
           newDirection = 'left';
           break;
-        case 'ArrowRight':
-          newPos.x = Math.min(340, newPos.x + moveSpeed);
+        case 'right':
+          newPos.x = Math.min(maxX, newPos.x + moveSpeed);
           newDirection = 'right';
           break;
         default:
-          return;
+          return prev;
       }
       
-      setCrocodilePos(newPos);
       setDirection(newDirection);
+      return newPos;
+    });
+  }, [direction, isMobile]);
+  
+  // Keyboard controls
+  React.useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Prevent default scrolling behavior
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+      
+      switch(e.key) {
+        case 'ArrowUp': moveCharacter('up'); break;
+        case 'ArrowDown': moveCharacter('down'); break;
+        case 'ArrowLeft': moveCharacter('left'); break;
+        case 'ArrowRight': moveCharacter('right'); break;
+      }
     };
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [crocodilePos, direction]);
+  }, [moveCharacter]);
   
   React.useEffect(() => {
     const checkCollision = () => {
@@ -134,8 +220,10 @@ const CrocodileAppleGame = () => {
             clearInterval(snapAnimation);
             setIsSnapping(false);
             setJawAngle(0);
-            const newX = Math.floor(Math.random() * 280) + 60;
-            const newY = Math.floor(Math.random() * 180) + 60;
+            const maxX = isMobile ? 240 : 280;
+            const maxY = isMobile ? 140 : 180;
+            const newX = Math.floor(Math.random() * maxX) + 60;
+            const newY = Math.floor(Math.random() * maxY) + 60;
             setApplePos({ x: newX, y: newY });
           }
         }, 75);
@@ -143,7 +231,7 @@ const CrocodileAppleGame = () => {
     };
     
     checkCollision();
-  }, [crocodilePos, applePos, isSnapping]);
+  }, [crocodilePos, applePos, isSnapping, isMobile]);
 
   return (
     <div className="game-container">
@@ -219,6 +307,38 @@ const CrocodileAppleGame = () => {
         <div className="instructions">
           Use arrow keys to move the crocodile
         </div>
+      </div>
+      
+      {/* Mobile touch controls */}
+      <div className="mobile-controls">
+        <button 
+          className="control-button control-up" 
+          onTouchStart={() => moveCharacter('up')}
+          aria-label="Move Up"
+        >
+          ↑
+        </button>
+        <button 
+          className="control-button control-down"
+          onTouchStart={() => moveCharacter('down')}
+          aria-label="Move Down"
+        >
+          ↓
+        </button>
+        <button 
+          className="control-button control-left"
+          onTouchStart={() => moveCharacter('left')}
+          aria-label="Move Left"
+        >
+          ←
+        </button>
+        <button 
+          className="control-button control-right"
+          onTouchStart={() => moveCharacter('right')}
+          aria-label="Move Right"
+        >
+          →
+        </button>
       </div>
     </div>
   );
