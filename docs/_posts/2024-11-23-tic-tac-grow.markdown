@@ -1,32 +1,170 @@
 ---
 layout: post
-title: "Tic Tac Grow"
+title: "TicTacGrow: From Bunny to Dragon"
 date: 2024-11-23 16:00:00 -0400
 categories: Games
 ---
 
-# Ultimate vs Easy Tic Tac Toe
+# TicTacGrow: From Bunny to Dragon
 
-A dual-mode Tic Tac Toe game where you can play in Easy Mode (against a friendly bunny 🐰) or challenge yourself in Ultimate Mode (against a fierce dragon 🐉). Perfect for both beginners and experts!
+Start with a friendly bunny in Easy Mode, then challenge the dragon when you're ready! A progressive Tic Tac Toe game that grows with your skills.
 
-## Game Component
+<div id="tictactoe-game-root"></div>
 
-```jsx
-iimport React, { useState, useEffect } from 'react';
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+<style>
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mode-button {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.mode-button.easy {
+  background-color: #FED7E2;
+  color: #702459;
+}
+
+.mode-button.easy.active {
+  background-color: #D53F8C;
+  color: white;
+}
+
+.mode-button.ultimate {
+  background-color: #FED7D7;
+  color: #742A2A;
+}
+
+.mode-button.ultimate.active {
+  background-color: #E53E3E;
+  color: white;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  background-color: #E2E8F0;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.game-cell {
+  width: 5rem;
+  height: 5rem;
+  border: 4px solid #CBD5E0;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.game-cell:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.message {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-item {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.challenge-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  max-width: 24rem;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.hint-button {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  background-color: #48BB78;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.hint-button:hover {
+  transform: scale(1.05);
+  background-color: #38A169;
+}
+</style>
+
+<script type="text/babel">
+// {% raw %}
 const TicTacToe = () => {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [isHumanTurn, setIsHumanTurn] = useState(true);
-  const [gameOver, setGameOver] = useState(false);
-  const [stats, setStats] = useState({ easy: { wins: 0, streak: 0 }, ultimate: { wins: 0, streak: 0 }});
-  const [message, setMessage] = useState("Let's start with Easy Mode! 🌟");
-  const [showHint, setShowHint] = useState(false);
-  const [currentHint, setCurrentHint] = useState(null);
-  const [gameMode, setGameMode] = useState('easy');
-  const [showChallengePrompt, setShowChallengePrompt] = useState(false);
+  const [board, setBoard] = React.useState(Array(9).fill(null));
+  const [isHumanTurn, setIsHumanTurn] = React.useState(true);
+  const [gameOver, setGameOver] = React.useState(false);
+  const [stats, setStats] = React.useState({ easy: { wins: 0, streak: 0 }, ultimate: { wins: 0, streak: 0 }});
+  const [message, setMessage] = React.useState("Let's start with Easy Mode! 🌟");
+  const [showHint, setShowHint] = React.useState(false);
+  const [currentHint, setCurrentHint] = React.useState(null);
+  const [gameMode, setGameMode] = React.useState('easy');
+  const [showChallengePrompt, setShowChallengePrompt] = React.useState(false);
 
   const CHALLENGE_THRESHOLD = 3;
-  
   const PLAYERS = {
     easy: { human: '🌟', ai: '🐰' },
     ultimate: { human: '⚔️', ai: '🐉' }
@@ -139,7 +277,7 @@ const TicTacToe = () => {
     return null;
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isHumanTurn && !gameOver) {
       const timer = setTimeout(() => {
         const aiMove = findAIMove();
@@ -221,30 +359,6 @@ const TicTacToe = () => {
       "Welcome to Ultimate Mode! Face the dragon! 🐉");
   };
 
-  const renderSquare = (i) => {
-    const { line } = calculateWinner(board);
-    const isWinningSquare = line?.includes(i);
-    const isHintSquare = showHint && currentHint?.index === i;
-    
-    return (
-      <button
-        className={`w-24 h-24 border-4 
-          ${gameMode === 'easy' ? 'border-pink-300' : 'border-red-400'}
-          text-5xl font-bold 
-          ${!board[i] && !gameOver ? 'hover:bg-gray-100' : 'cursor-not-allowed'}
-          ${isWinningSquare ? (gameMode === 'easy' ? 'bg-yellow-100' : 'bg-red-100') : 
-            isHintSquare ? 'bg-green-100' : 'bg-white'}
-          rounded-xl transition-all duration-300 ease-in-out
-          transform hover:scale-105
-          focus:outline-none shadow-lg`}
-        onClick={() => handleClick(i)}
-        disabled={gameOver || !!board[i]}
-      >
-        {board[i]}
-      </button>
-    );
-  };
-
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     setIsHumanTurn(true);
@@ -253,29 +367,52 @@ const TicTacToe = () => {
     setCurrentHint(null);
   };
 
-  return (
-    <div className={`flex flex-col items-center gap-4 p-6 
-      ${gameMode === 'easy' ? 'bg-gradient-to-b from-pink-50 to-purple-50' 
-        : 'bg-gradient-to-b from-red-50 to-gray-100'} 
-      min-h-96 rounded-lg relative`}>
-      
+  const renderBoard = () => (
+    <div className="game-board">
+      {board.map((cell, i) => {
+        const { line } = calculateWinner(board);
+        const isWinningCell = line?.includes(i);
+        const isHintCell = showHint && currentHint?.index === i;
+        
+        return (
+          <button
+            key={i}
+            className="game-cell"
+            style={{
+              backgroundColor: isWinningCell ? 
+                (gameMode === 'easy' ? '#FEF3C7' : '#FEE2E2') : 
+                isHintCell ? '#D1FAE5' : 'white',
+              borderColor: gameMode === 'easy' ? '#FBD38D' : '#FCA5A5'
+            }}
+            onClick={() => handleClick(i)}
+            disabled={gameOver || !!cell}
+          >
+            {cell}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+return (
+    <div className="game-container">
       {showChallengePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md m-4">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">🏆 Amazing Progress!</h2>
+        <div className="challenge-modal">
+          <div className="modal-content">
+            <h2 className="text-xl font-bold text-red-600 mb-4">🏆 Amazing Progress!</h2>
             <p className="mb-4">
               Wow! You've won {stats.easy.streak} games in a row! 
               You're getting really good at this! Ready for a bigger challenge?
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="modal-buttons">
               <button
-                className="px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transform hover:scale-105 transition shadow-lg"
+                className="mode-button ultimate"
                 onClick={() => handleModeSwitch('ultimate')}
               >
                 Accept Challenge 🐉
               </button>
               <button
-                className="px-6 py-3 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition"
+                className="mode-button easy"
                 onClick={() => setShowChallengePrompt(false)}
               >
                 Stay in Easy Mode
@@ -285,52 +422,68 @@ const TicTacToe = () => {
         </div>
       )}
 
-      <h1 className={`text-3xl font-bold mb-2 
-        ${gameMode === 'easy' ? 'text-pink-600' : 'text-red-600'}`}>
-        {gameMode === 'easy' ? 'Fun & Easy' : 'Ultimate Challenge'} Mode
-      </h1>
-
-      <div className="flex gap-4 mb-4">
+      <div className="mode-buttons">
         <button
-          className={`px-6 py-2 rounded-full transition 
-            ${gameMode === 'easy' ? 'bg-pink-500 text-white' : 'bg-gray-200'}`}
+          className={`mode-button easy ${gameMode === 'easy' ? 'active' : ''}`}
           onClick={() => handleModeSwitch('easy')}
         >
           Easy Mode 🌟
         </button>
         <button
-          className={`px-6 py-2 rounded-full transition 
-            ${gameMode === 'ultimate' ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+          className={`mode-button ultimate ${gameMode === 'ultimate' ? 'active' : ''}`}
           onClick={() => handleModeSwitch('ultimate')}
         >
           Ultimate Mode 🐉
         </button>
       </div>
 
-      <div className="flex gap-4 mb-4">
-        <div className="bg-white px-4 py-2 rounded-full shadow-md">
+      <div className="stats">
+        <div className="stat-item">
           Wins: {stats[gameMode].wins} 🏆
         </div>
         {stats[gameMode].streak > 1 && (
-          <div className="bg-yellow-100 px-4 py-2 rounded-full shadow-md">
+          <div className="stat-item">
             Streak: {stats[gameMode].streak} 🔥
           </div>
         )}
       </div>
 
-      <div className="text-xl mb-4 h-12 text-center px-6 py-2 bg-white rounded-full shadow-md">
+      <div className="message">
         {message}
       </div>
 
-      <div className="grid grid-cols-3 gap-2 bg-gray-200 p-4 rounded-xl shadow-xl">
-        {[0,1,2,3,4,5,6,7,8].map(i => renderSquare(i))}
+      <div className="game-board">
+        {board.map((cell, i) => {
+          const { line } = calculateWinner(board);
+          const isWinningCell = line?.includes(i);
+          const isHintCell = showHint && currentHint?.index === i;
+          
+          return (
+            <button
+              key={i}
+              className="game-cell"
+              style={{
+                backgroundColor: isWinningCell ? 
+                  (gameMode === 'easy' ? '#FEF3C7' : '#FEE2E2') : 
+                  isHintCell ? '#D1FAE5' : 'white',
+                borderColor: gameMode === 'easy' ? '#FBD38D' : '#FCA5A5'
+              }}
+              onClick={() => handleClick(i)}
+              disabled={gameOver || !!cell}
+            >
+              {cell}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex gap-4 mt-4">
+      <div className="game-controls">
         <button
-          className={`px-6 py-3 rounded-full 
-            ${gameMode === 'easy' ? 'bg-pink-500' : 'bg-red-500'} 
-            text-white font-bold shadow-lg hover:scale-105 transition`}
+          className="mode-button"
+          style={{
+            backgroundColor: gameMode === 'easy' ? '#D53F8C' : '#E53E3E',
+            color: 'white'
+          }}
           onClick={resetGame}
         >
           New Game 🎮
@@ -338,8 +491,7 @@ const TicTacToe = () => {
         
         {gameMode === 'easy' && !gameOver && (
           <button
-            className="px-6 py-3 bg-green-500 text-white rounded-full font-bold
-              shadow-lg hover:scale-105 transition"
+            className="hint-button"
             onClick={() => {
               setShowHint(!showHint);
               setCurrentHint(getHint());
@@ -350,11 +502,18 @@ const TicTacToe = () => {
         )}
       </div>
 
-      <div className="mt-4 text-center text-gray-600">
+      <div className="game-info">
         <p>You ({PLAYERS[gameMode].human}) vs {gameMode === 'easy' ? 'Friendly' : 'Ultimate'} AI ({PLAYERS[gameMode].ai})</p>
       </div>
     </div>
   );
 };
 
-export default TicTacToe;
+// Render the game
+ReactDOM.render(
+  <TicTacToe />,
+  document.getElementById('tictactoe-game-root')
+);
+// {% endraw %}
+</script>
+              
