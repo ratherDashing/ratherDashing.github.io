@@ -7,7 +7,7 @@ categories: Games
 
 # Multi-Player Scrabble Score Tracker
 
-A dynamic Scrabble board that tracks scores and handles letter multipliers automatically! (Part 1 of 2)
+A dynamic Scrabble board that tracks scores and handles letter multipliers automatically!
 
 <div id="scrabble-game-root"></div>
 
@@ -58,14 +58,6 @@ A dynamic Scrabble board that tracks scores and handles letter multipliers autom
   transform: scale(1.05);
 }
 
-.cell-label {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  font-size: 0.5rem;
-  color: #666;
-}
-
 .score-board {
   display: flex;
   flex-wrap: wrap;
@@ -100,14 +92,6 @@ A dynamic Scrabble board that tracks scores and handles letter multipliers autom
   padding: 0.5rem;
   background-color: #f3f4f6;
   border-radius: 0.25rem;
-}
-
-.coordinates {
-  display: grid;
-  place-items: center;
-  font-size: 0.75rem;
-  color: #666;
-  font-weight: 500;
 }
 
 .button {
@@ -145,22 +129,6 @@ A dynamic Scrabble board that tracks scores and handles letter multipliers autom
   margin-bottom: 1rem;
 }
 
-.board-container {
-  display: inline-grid;
-  gap: 0;
-  padding: 2rem;
-}
-
-.coordinate-label {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  color: #666;
-}
-
 select {
   padding: 0.5rem;
   border-radius: 0.25rem;
@@ -174,20 +142,10 @@ input {
 }
 </style>
 
----
-layout: post
-title: "Multi-Player Scrabble Score Tracker - Part 2/2"
-date: 2024-11-28 11:42:00 -0400
-categories: Games
----
-
-[Back to Part 1](/games/2024/11/28/scrabble-score-tracker-1.html)
-
 <script type="text/babel">
 // {% raw %}
 const ScrabbleGame = () => {
   const BOARD_SIZE = 15;
-  const coordinates = Array.from({ length: BOARD_SIZE }, (_, i) => i);
   const [board, setBoard] = React.useState(() => {
     const saved = localStorage.getItem('scrabbleBoard');
     return saved ? JSON.parse(saved) : Array(BOARD_SIZE).fill().map(() => 
@@ -489,53 +447,30 @@ const ScrabbleGame = () => {
         ))}
       </div>
 
-      <div className="board-container" tabIndex={0} onKeyDown={handleKeyDown}>
-        {/* Column coordinates */}
-        <div className="flex pl-8">
-          {coordinates.map(col => (
-            <div key={`col-${col}`} className="coordinate-label">
-              {col + 1}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex">
-          {/* Row coordinates */}
-          <div className="w-8">
-            {coordinates.map(row => (
-              <div key={`row-${row}`} className="coordinate-label">
-                {String.fromCharCode(65 + row)}
+      <div className="game-board" tabIndex={0} onKeyDown={handleKeyDown}>
+        {board.map((row, rowIndex) => (
+          row.map((cell, colIndex) => {
+            const squareType = getSquareType(rowIndex, colIndex);
+            const isSelected = selectedPosition?.row === rowIndex && selectedPosition?.col === colIndex;
+            return (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                className={`
+                  cell ${squareType}
+                  ${isSelected ? 'ring-2 ring-blue-500' : ''}
+                  ${cell.isNew ? 'font-bold' : ''}
+                `}
+                onClick={() => handleCellClick(rowIndex, colIndex)}
+              >
+                {cell.letter ? (
+                  <span className="text-lg">{cell.letter.toUpperCase()}</span>
+                ) : (
+                  <span className="text-xs text-gray-500">{getSquareLabel(squareType)}</span>
+                )}
               </div>
-            ))}
-          </div>
-
-          {/* Board */}
-          <div className="game-board">
-            {board.map((row, rowIndex) => (
-              row.map((cell, colIndex) => {
-                const squareType = getSquareType(rowIndex, colIndex);
-                const isSelected = selectedPosition?.row === rowIndex && selectedPosition?.col === colIndex;
-                return (
-                  <div
-                    key={`${rowIndex}-${colIndex}`}
-                    className={`
-                      cell ${squareType}
-                      ${isSelected ? 'ring-2 ring-blue-500' : ''}
-                      ${cell.isNew ? 'font-bold' : ''}
-                    `}
-                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                  >
-                    {cell.letter ? (
-                      <span className="text-lg">{cell.letter.toUpperCase()}</span>
-                    ) : (
-                      <span className="text-xs text-gray-500">{getSquareLabel(squareType)}</span>
-                    )}
-                  </div>
-                );
-              })
-            ))}
-          </div>
-        </div>
+            );
+          })
+        ))}
       </div>
     </div>
   );
