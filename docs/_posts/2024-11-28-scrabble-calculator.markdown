@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "Multi-Player Scrabble Score Tracker - Part 1/2"
+title: "Multi-Player Scrabble Score Tracker"
 date: 2024-11-28 11:42:00 -0400
 categories: Games
 ---
 
 # Multi-Player Scrabble Score Tracker
 
-A dynamic Scrabble board that tracks scores and handles letter multipliers automatically! (Part 1 of 2)
+A dynamic Scrabble board that tracks scores and handles letter multipliers automatically!
 
 <div id="scrabble-game-root"></div>
 
