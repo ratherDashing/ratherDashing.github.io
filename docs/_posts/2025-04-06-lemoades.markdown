@@ -33,17 +33,17 @@ categories: Family Business
       <tr>
         <td>Small</td>
         <td>$0.50</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Medium</td>
         <td>$1.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Large</td>
         <td>$2.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
@@ -63,17 +63,17 @@ categories: Family Business
       <tr>
         <td>Small</td>
         <td>$1.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Medium</td>
         <td>$1.30</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Large</td>
         <td>$2.30</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
@@ -93,17 +93,17 @@ categories: Family Business
       <tr>
         <td>1 Cookie</td>
         <td>$1.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>2 Cookies</td>
         <td>$2.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>3 Cookies</td>
         <td>$3.00</td>
-        <td><a href="#order" class="order-button">Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
@@ -127,7 +127,7 @@ Lemon-O-Ades is a lemonade company that sells cookies too. Charlie and his broth
 
 ## Contact
 
-Call: 862-305-1038
+Call: 862-308-1038
 
 ## Delivery Options
 
@@ -151,58 +151,142 @@ We offer delivery service! Choose your items below:
         <td>Classic Lemonade</td>
         <td>Small</td>
         <td>$0.50</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Classic Lemonade</td>
         <td>Medium</td>
         <td>$1.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Classic Lemonade</td>
         <td>Large</td>
         <td>$2.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Pink Lemonade</td>
         <td>Small</td>
         <td>$1.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Pink Lemonade</td>
         <td>Medium</td>
         <td>$1.30</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Pink Lemonade</td>
         <td>Large</td>
         <td>$2.30</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Cookies</td>
         <td>1 Cookie</td>
         <td>$1.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Cookies</td>
         <td>2 Cookies</td>
         <td>$2.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Cookies</td>
         <td>3 Cookies</td>
         <td>$3.00</td>
-        <td><a href="#order-delivery" class="order-button">Add to Order</a></td>
+        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
   
-  <p>Call <strong>862-308-1038</strong> to place your delivery order.</p>
+  <p>Call <strong>862-305-1038</strong> to place your delivery order.</p>
+  
+  <div class="cart-section">
+    <h4>Your Cart</h4>
+    <div id="cart-items">
+      <!-- Cart items will appear here dynamically -->
+    </div>
+    <div class="cart-total">
+      <p>Total: $<span id="cart-total">0.00</span></p>
+    </div>
+    <div class="checkout-button">
+      <a href="mailto:mwarren83@gmail.com?subject=Lemon-O-Ades%20Order&body=My%20order%20from%20Lemon-O-Ades:" class="checkout-button" id="checkout-link">Check Out</a>
+    </div>
+  </div>
 </div>
+
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    let cart = [];
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const checkoutLink = document.getElementById('checkout-link');
+    
+    // Add event listeners to all "Add to Cart" buttons
+    document.querySelectorAll('.cart-button').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const row = this.closest('tr');
+        const cells = row.querySelectorAll('td');
+        const item = cells[0].textContent;
+        const size = cells[1].textContent;
+        const price = parseFloat(cells[2].textContent.replace('
+, ''));
+        
+        // Add to cart
+        cart.push({ item, size, price });
+        updateCart();
+      });
+    });
+    
+    function updateCart() {
+      // Clear current cart display
+      cartItems.innerHTML = '';
+      
+      // Calculate total
+      let total = 0;
+      let emailBody = 'My order from Lemon-O-Ades:%0A%0A';
+      
+      // Add each item to display
+      cart.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.innerHTML = `
+          <span>${item.item} (${item.size}): ${item.price.toFixed(2)}</span>
+          <button class="remove-item" data-index="${index}">Remove</button>
+        `;
+        cartItems.appendChild(itemElement);
+        
+        total += item.price;
+        emailBody += `- ${item.item} (${item.size}): ${item.price.toFixed(2)}%0A`;
+      });
+      
+      // Update total display
+      cartTotal.textContent = total.toFixed(2);
+      
+      // Add total to email body
+      emailBody += `%0ATotal: ${total.toFixed(2)}%0A%0A`;
+      emailBody += 'Customer Information:%0A';
+      emailBody += 'Name: %0A';
+      emailBody += 'Address: %0A';
+      emailBody += 'Phone: %0A';
+      
+      // Update checkout link
+      checkoutLink.href = `mailto:mwarren83@gmail.com?subject=Lemon-O-Ades%20Order&body=${emailBody}`;
+      
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+          const index = parseInt(this.getAttribute('data-index'));
+          cart.splice(index, 1);
+          updateCart();
+        });
+      });
+    }
+  });
+</script>
