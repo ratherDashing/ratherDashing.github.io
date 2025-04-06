@@ -1,0 +1,64 @@
+---
+layout: post
+title:  "Lemon-O-Ades: Charlie's Lemonade Stand"
+date:   2025-04-06 17:00:00 -0400
+categories: Family Business
+---
+
+# Welcome to Lemon-O-Ades!
+
+*How may we help you?*
+
+<div class="navigation">
+  <a href="#delivery" class="button">Delivery</a>
+  <a href="#about" class="button">About</a>
+  <a href="#jobs" class="button">Jobs</a>
+</div>
+
+## Menu
+
+### Lemonade
+| Size | Price |
+|------|-------|
+| Large | $2.00 |
+| Medium | $1.00 |
+| Small | $0.50 |
+
+### Pink Lemonade
+| Size | Price |
+|------|-------|
+| Large | $2.30 |
+| Medium | $1.30 |
+| Small | $1.00 |
+
+### Cookies
+| Quantity | Price |
+|----------|-------|
+| 1 Cookie | $1.00 |
+| 2 Cookies | $2.00 |
+| 3 Cookies | $3.00 |
+
+## About Us
+
+<a href="#about" class="button">Learn More</a>
+
+Lemon-O-Ades is a lemonade company that sells cookies too. Charlie started the company. Our summer season runs from July 7th through August 25th!
+
+## Jobs
+
+<a href="#jobs" class="button">View Openings</a>
+
+### Available Positions:
+- Lemonade Mixer (apply)
+- Waiter (apply)
+- Delivery Person (apply)
+
+## Contact
+
+Call: 862-308-1038
+
+## Delivery Options
+
+<a href="#delivery" class="button">Order Delivery</a>
+
+We offer delivery service! Ask for details.
