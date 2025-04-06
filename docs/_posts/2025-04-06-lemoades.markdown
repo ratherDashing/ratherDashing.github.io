@@ -26,24 +26,20 @@ categories: Family Business
       <tr>
         <th>Size</th>
         <th>Price</th>
-        <th>Order</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>Small</td>
         <td>$0.50</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Medium</td>
         <td>$1.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Large</td>
         <td>$2.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
@@ -56,24 +52,20 @@ categories: Family Business
       <tr>
         <th>Size</th>
         <th>Price</th>
-        <th>Order</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>Small</td>
         <td>$1.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Medium</td>
         <td>$1.30</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>Large</td>
         <td>$2.30</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
@@ -86,24 +78,20 @@ categories: Family Business
       <tr>
         <th>Quantity</th>
         <th>Price</th>
-        <th>Order</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>1 Cookie</td>
         <td>$1.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>2 Cookies</td>
         <td>$2.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
       <tr>
         <td>3 Cookies</td>
         <td>$3.00</td>
-        <td><a href="#add-to-cart" class="cart-button">Add to Cart</a></td>
       </tr>
     </tbody>
   </table>
