@@ -43,4 +43,4 @@ Are you a fan of Among Us? What would you most want to see in an Among Us movie?
 ---
 
 *Status: In Production*
-*Release Date: TBA*
+*Release Date: August 7th, 2029*
