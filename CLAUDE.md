@@ -6,25 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Jekyll-based GitHub Pages site for "Charlie and Phillip's Website" (charlieandphillip.com), a personal blog and portfolio showcasing posts, games, and projects created by Charlie and Phillip Warren.
 
-## Development Commands
-
-All Jekyll commands must be run from the `docs/` directory:
-
-```bash
-cd docs
-
-# Install dependencies (first time setup)
-bundle install
-
-# Serve the site locally with live reload
-bundle exec jekyll serve
-
-# Build the site (output to _site/)
-bundle exec jekyll build
-```
-
-The local development server runs at `http://localhost:4000` by default.
-
 ## Repository Structure
 
 ```
@@ -94,9 +75,44 @@ title: "Post Title"
 </script>
 ```
 
+## Publishing Books from Google Docs
+
+Charlie writes books in Google Docs and exports them as `.zip` files (HTML export). To publish one:
+
+1. **Extract the zip** — it contains an HTML file and an `images/` folder
+2. **Copy images** to `docs/assets/images/` with descriptive names (e.g., `sit-cover.png` instead of `image1.png`)
+3. **Create a post** in `docs/_posts/` with category `Books`
+4. **Convert the HTML to markdown**, preserving Charlie's formatting:
+   - Chapter titles as `<div class="chapter-title">` elements (styled at 2em font size)
+   - Italic text for thoughts and emphasis using `*...*`
+   - Bold/italic/underline for sound effects using `***<u>...</u>***`
+   - Monospace/computer text using `<span class="computer-text">...</span>` for gadget screens, search results, and passcodes
+   - Horizontal rules (`---`) between chapters
+   - The book's front matter (cover, author credits, other books) and back matter (about the author, mission info) should be included
+5. **Include these CSS classes** in a `<style>` block at the top of the post:
+   - `.book-cover` — centered, max-width 500px
+   - `.book-meta` — smaller font for credits
+   - `.chapter-title` — 2em font size with top margin
+   - `.computer-text` — Consolas/monospace font
+   - `.book-title-large` — 2.5em for the title page
+6. **Delete the zip** after publishing
+7. The Google Docs HTML is a single long line with lots of CSS classes (c0, c1, etc.) and `&ldquo;`/`&rdquo;` entities — these all need to be converted to clean markdown with proper quotes
+
+## Jekyll/Kramdown HTML Gotchas
+
+Kramdown (the markdown renderer used by GitHub Pages) has important quirks when mixing HTML and markdown:
+
+- **Markdown inside HTML blocks is NOT processed.** If you put `**bold**` or `## Heading` inside a `<div>`, it renders as literal text. To fix this, either:
+  - Add `markdown="1"` to the HTML element: `<div markdown="1">`
+  - Or use raw HTML tags instead (`<strong>`, `<h2>`, `<p>`, `<br>`)
+- **Text inside `<div>` blocks has no line breaks.** Plain text in a div runs together. Use `<p>` and `<br>` tags for structure.
+- **Backslash escapes can render literally.** `\-` shows as `\-` in the output. Just use the character directly or use HTML entities.
+- **Always verify published output with `curl`.** The local markdown preview and the actual Jekyll build can differ significantly. Curl the live page after pushing to check that formatting rendered correctly.
+- **Prefer HTML over markdown when inside HTML blocks.** Don't mix markdown syntax into `<div>` sections — use `<strong>`, `<em>`, `<h2>`, `<p>`, `<br>` instead.
+
 ## Important Notes
 
 - The site is deployed via GitHub Pages, which builds automatically on push to the main branch
-- Local builds generate output to `_site/` (gitignored)
+- There is no local Jekyll/bundle setup — just push and verify on the live site
 - When creating new posts with React components, always wrap JSX code in Jekyll raw tags to prevent template processing conflicts
 - The site uses future dating for posts, so dates can be set in the future for scheduled content
