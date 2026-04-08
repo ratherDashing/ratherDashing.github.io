@@ -22,15 +22,13 @@ categories: Books
 <img src="/assets/images/sit-cover.png" alt="S.I.T. Cover" class="book-cover">
 
 <div class="book-meta">
-Cover Design: Gemini's Nano-Banana
-Author: Charles Warren
-
-Other Books By Charles Warren:
--Herobrine: A Mythical, Science-Fiction Story
-
-Books Being Made by Charles Warren
--Herobrine: Part 2
--S.I.T. 2 The Big Bombs
+<p>Cover Design: Gemini's Nano-Banana<br>
+Author: Charles Warren</p>
+<p>Other Books By Charles Warren:<br>
+-Herobrine: A Mythical, Science-Fiction Story</p>
+<p>Books Being Made by Charles Warren<br>
+-Herobrine: Part 2<br>
+-S.I.T. 2 The Big Bombs</p>
 </div>
 
 <div class="book-title-large">S.I.T.</div>
@@ -156,10 +154,8 @@ I am Charlie Warren, and I am 9 years old. I live with my family in New Jersey. 
 ---
 
 <div class="mission-info">
-
-**Mission Information:**
-**Destroy all text after reading**
-
+<p><strong>Mission Information:</strong><br>
+<strong>Destroy all text after reading</strong></p>
 </div>
 
 **Agent:** Charles Warren
