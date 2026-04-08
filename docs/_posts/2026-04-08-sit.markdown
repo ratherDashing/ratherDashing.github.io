@@ -26,11 +26,11 @@ Cover Design: Gemini's Nano-Banana
 Author: Charles Warren
 
 Other Books By Charles Warren:
-\-Herobrine: A Mythical, Science-Fiction Story
+-Herobrine: A Mythical, Science-Fiction Story
 
 Books Being Made by Charles Warren
-\-Herobrine: Part 2
-\-S.I.T. 2 The Big Bombs
+-Herobrine: Part 2
+-S.I.T. 2 The Big Bombs
 </div>
 
 <div class="book-title-large">S.I.T.</div>
@@ -47,22 +47,22 @@ Herobrine: A Mythical, Science-Fiction story &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hero
 
 ---
 
-<div class="toc">
+<div class="toc" markdown="1">
 
 ## Chapters
 
-<p>1: Starter Scout……………………..3</p>
-<p>2: Let's Start! Say that Sarcastically……...7</p>
-<p>3: Full Speed Ahead!.................................9</p>
-<p>4: Get Ready For (Mild) Violence!.............12</p>
-<p>5: Escaping The Lair………………….16</p>
-<p>6: Questioning………………………22</p>
-<p>7: Kidnapped………………………..25</p>
-<p>8: Truck Discussion………………..28</p>
-<p>9: Secret Identities…………………32</p>
-<p>10: Parkour and Secrets……..………35</p>
-<p>11: Aftermath………………………….42</p>
-<p>About The Author…………………….44</p>
+<p><a href="#chapter-1">1: Starter Scout……………………..3</a></p>
+<p><a href="#chapter-2">2: Let's Start! Say that Sarcastically……...7</a></p>
+<p><a href="#chapter-3">3: Full Speed Ahead!.................................9</a></p>
+<p><a href="#chapter-4">4: Get Ready For (Mild) Violence!.............12</a></p>
+<p><a href="#chapter-5">5: Escaping The Lair………………….16</a></p>
+<p><a href="#chapter-6">6: Questioning………………………22</a></p>
+<p><a href="#chapter-7">7: Kidnapped………………………..25</a></p>
+<p><a href="#chapter-8">8: Truck Discussion………………..28</a></p>
+<p><a href="#chapter-9">9: Secret Identities…………………32</a></p>
+<p><a href="#chapter-10">10: Parkour and Secrets……..………35</a></p>
+<p><a href="#chapter-11">11: Aftermath………………………….42</a></p>
+<p><a href="#about-the-author">About The Author…………………….44</a></p>
 
 </div>
 
@@ -73,7 +73,7 @@ Herobrine: A Mythical, Science-Fiction story &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hero
 
 ---
 
-<div class="chapter-title">Chapter 1:</div>
+<div class="chapter-title" id="chapter-1">Chapter 1:</div>
 <div class="chapter-title">Starter Scout</div>
 
 "Ok, Scout!" Master Nick said. "Yes, Sir?" I saluted. "You have survived your first war, right?" I gulped. "Yep. Another One?" "Nope. We have a new recruit. You are going to train him." *"Aw, man." I thought.*
@@ -83,55 +83,55 @@ Herobrine: A Mythical, Science-Fiction story &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hero
 
 ---
 
-<div class="chapter-title">Chapter 2: Let's start! Say that Sarcasticly…</div>
+<div class="chapter-title" id="chapter-2">Chapter 2: Let's start! Say that Sarcasticly…</div>
 
 "Ok, you got exercise?" I said. "Yeah. I just need some water." "Ok" I went to the water filler. I put in a glass. "So, what mission do you think we might go on?" I said. "We might go on a mission to arrest Bryce Kerril." Max said. "Oh, man…" My SpyPod rang. I put it in my ear and held the answer button. It said "Agent Charlie Warren, You're going on a mission to arrest Bryce Kerril. Your partner will be tagging along." I said "I accept." Then I stopped holding the answer button. "What?" Max said, wondering. "We got a Bryce Kerril mission." I said. Max dropped his water glass. "Stunning." He said. "Just stunning." We were now running to the Speedy Car station. All of them were full. "Aw, man. What are we gonna do now?"   "Come on. I've got a plan." I grabbed the back of a speedy car. Believe me, he hopped on too. Security guards saw us shockingly. "Hey!" one said. "Come back here right now!" The first one had a few sheets of toilet paper, and a bottle of liquid chloroform. He was wearing a security suit but looked familiar. Second one, same exact things on him, but a lie detector. The doors were closing. "Buh-Bye!" I said. Now, the doors were closing. We were going at full speed.
 
 ---
 
-<div class="chapter-title">Chapter 3: Full Speed Ahead!</div>
+<div class="chapter-title" id="chapter-3">Chapter 3: Full Speed Ahead!</div>
 
 I grabbed the mile meter from my pocket. It said 66 MPH. "Let's get to the top." I said. "Ok." We climbed up the Speedy Car. "We are definitely Ok!" I said. Sarcastically. Max rolled his eyes. I spotted a handle. "Hold on." I said. I grabbed the handle, lifted Max up, and he grabbed on the handle. We saw a cart with no people in it. We quickly jumped on it. We grabbed a Fire Chainsaw. I stabbed it in the train. Max and I pulled it and made the hole a circle. It broke. We jumped inside. Then we got Hot Glue and fixed it. I turned the lever left for testing, but we fell out of the pipe. "Oooohhhh nooo…" I said. We were about to crash into the Mission center, and there were no rails. I triggered *No More Rails About To Crash Warning!* But we were just exactly 2.4 inches away from crashing. Then we saw a hole open. We went into the hole, then bonked into a wall very gently but rough at the same time. "Hello. You have seemed to do this *again*, Ott." a Worker said. "You did this once???" I said. "Sadly, yes." the worker said. "Also, your car is broken. But we'll get you a new one." We saw a Speedy Car LIII\* "Can we have a Speedy Car LIII?" I said. "Sure." The Worker said. He grabbed the keys for a Speedy Car LIII and gave it to me. "First you have to get through a clean up." The worker said. They took away the car, scrubbed my whole body, washed it, then finally brought in the Speedy Car LIII. We went in and drove away AFAP (As Fast As Possible). We saw a "Teleport" Button. We pressed it and were back on track (Actually).
 
 ---
 
-<div class="chapter-title">Chapter 4: Get Ready For (Mild) Violence!</div>
+<div class="chapter-title" id="chapter-4">Chapter 4: Get Ready For (Mild) Violence!</div>
 
 We were at Bryce Kerril's secret base. There were 2 very, very bulk guards. When we got there, we met the guards. "What trouble are you two going to cause?" The first guard said. "Buisness." I said. They looked at my CIA tag. They raised their guns up. "Get outta here." The first guard said. "Oh, I don't think so." I said while I grabbed my tape taser. I wrapped it around the first guard's leg and he was tased a bit. When he was tased, his gun fell out of his hand. I caught it, refilled it with a Tranquilizer dart, and shot one of the guards. I tased the other one, and he dropped 3 pieces of toilet paper and a bottle of chloroform. Then, I put a key in the lock and it opened with a crack. "Let's go in," I said. I grabbed a guard's key. I opened the door. I heard a familiar voice. "How will we get 5 million dollars?" The voice said. "We should simply rob a Vegas bank." another voice said. "All of them are connected." The Voice said again. "They have their own safes." The other voice said again. "Fair enough." the regular voice said. They left the lair quietly. I opened a gadget to see where stuff was. I typed in <span class="computer-text">PASSCODE INSERT CALLER</span>. It said <span class="computer-text">1 ITEM DETECTED</span>. I pressed <span class="computer-text">LEAD ME TO IT THE FASTEST WAY POSSIBLE</span>. It said it was 2 feet away from me. "Oh. There it is." I said. "Let me try the passcode!" Max said. He typed in <span class="computer-text">01134=1134</span>. There was no way he was ri- <span class="computer-text">ACCESS GRANTED</span> the passcode said. I walked through the door, very surprised. Looking out, I knew something wasn't right. "Let's check for any sounds." I whispered. Then I heard a beep. Then, 4 people came out. I gripped the first one's hand and then slammed him into the wall. Then the second one had a tranquilizer. I turned the tranquilizer in his face and shot in his nose. The third one had a glass bottle. I threw it against the wall and tased him with the taser next to me. The fourth one grabbed the taser I dropped and aimed it at me. I had my hands up. I didn't know what to do. There were no weapons. Then, when I thought I was gonna fail the mission, Max kicked him into a wall, grabbed the taser, and tased him. "Wow. Thanks." I said in shock. "You're Welcome. We are partners, anyway." Then we slowly left the evil lair with the 4 criminals with handcuffs.
 
 ---
 
-<div class="chapter-title">Chapter 5: Escaping The Lair</div>
+<div class="chapter-title" id="chapter-5">Chapter 5: Escaping The Lair</div>
 
 As soon as we left the lair, helicopters and speedcars were surrounding us. "Drop those people with your hands up!" a bad guy said. We ran towards the nearest speedcar and piled in it. We tased the drivers and sped away. A car was next to us. "Stop that car!" I heard someone say. Then, the next thing you knew it, there were airplanes up upon me. People were dropping into sunroofs with something called <span class="computer-text">Weapon Format Backpacks and Evil S.U.I.T.'s</span>. I didn't know what this meant, so I searched it up on my phone. "YOU SERIOUS?!?!" Max said. "Take the wheel." I said, moving from the driver's seat to the passenger's seat quickly. I typed in <span class="computer-text">WEAPON FORMAT BACKPACKS AND EVIL S.U.I.T.'s</span> and there were 2 results: <span class="computer-text">S.U.I.T</span> and <span class="computer-text">WEAPON FORMAT BACKPACKS AND EVIL S.U.I.T's</span>. I pressed the second result and it said <span class="computer-text">THIS COMPANY IS VERY EVIL. THEY TRADE MONEY FOR BACKBACKS FILLED WITH GUNS, TRANQUILIZERS, AND GRENADES/BOMBS. OUR ADVICE IS TO STAY AWAY FROM THIS EXACT COMPANY BECAUSE IT IS PARTNERS WITH CHEATSO VILLIANCO.</span> I wondered… Who or What is Cheatso Villianco? I typed in <span class="computer-text">CHEATSO VILLIANCO</span> and there was one simple result: <span class="computer-text">CHEATSO VILLIANCO</span>. I clicked it and it said this: <span class="computer-text">CHEATSO VILLIANCO IS A COMPANY THAT USED TO WORK WITH THE C.I.A. AND S.I.T. . SO WE USED TO THINK IT CAPTURED VILLIANS. BUT IT STOLE MONEY FROM US AND WE CAUGHT ONTO IT A FEW HOURS AFTER THE HEIST. THE MISSION WAS CALLED THE MONEY SCOUNDREL WHICH WAS SOLVED IN LESS THAN 12 HOURS. NOW IT'S A MYSTERY WHAT THEY ARE DOING.</span> Now Bryce Kerril is a part of Cheatso Villianco. I have to stop those bombs. Then I grabbed a grapple hook. I threw it against the truck and grabbed another one. When I was in the air, I attached it to another front of a truck. The trucks turned from front to back. The back doors opened from both trucks. Guns were aiming at me. Then my partner came in, with two grapple hooks, saying "You cruddy people aren't noticing what we are doing!" He put the grapple hooks between the two tops. I pulled and got into a truck. There were too many girls in the truck. "Hehe…" I said. I tased all of them except one by accident. Then tranquilized her. I got into the passenger seat and tranquilized her, throwing her into the back of the truck. Oh this thing has discs? I got the old disc out which was "Classical Romance with Kenny G" I looked through the disc saver and it had Dawn FM, After Hours, Hurry Up Tomorrow, MONTERO, Trilogy, "Man, this girl loves The Weeknd." and The Clean Funk Wav Trilogy. I realized: *I love the Funk Wav Trilogy!* I put the disc in, changing the music from Slide to Feels to Obsessed to Potion to Skrt On Me to Cash Out to more songs until this Busta Rhymes one. Then I turned it to Reverse and Auto Drive and turned it to the back. Then I opened the back door and opened the Speedcar trunk. I got all of the stuff out of the trunk, then turned back to the regular forward driving. Then turned off Auto Drive. I crashed into our Speedcar and it started destroying itself, flipping off the track. I turned to the other truck and rammed into it, and it started doing the same thing the speedcar did. The last second before it went off the track, Max jumped out, grabbed a grapple hook, and the grapple hook hooked onto the back of the truck and I opened it. Max pulled his grapple hook off the back and hooked it onto the wall of the truck. Max was shocked when he came in the truck. He was stepping carefully over the tranquilized and tased ladies. He sat in the passenger seat and said "Busta Rhymes?" .
 
 ---
 
-<div class="chapter-title">Chapter 6: Questioning</div>
+<div class="chapter-title" id="chapter-6">Chapter 6: Questioning</div>
 
 A bright light shined upon one of the people from the lair. "Talk!" I said. "Ok, Ok! We're gonna have a big heist! I'm not telling you about it." He said. "We don't need him. He's useless." Max said. "I agree." I said. "Kick him out." An elevator formed around him. The elevator then went out of shape. The driver of the ladies car showed up. "What Information do you have?" I said. "Por favor, hable en español." She said. "She said, 'Please talk in Spanish.'" Max said. "Oh, can you translate this conversation, Max?" I said. "Ok!" he said. "Hola, estamos investigando qué estaba sucediendo y cuál era el plan del que hablaba Bryce Kerril en su guarida. ¿Sabes algo al respecto?" Max said. "Si, conocía a Bryce Kerril. Es un verdadero imbécil. Quién sabe qué tontería hará a continuación." She said. "She said, 'Yes, I knew Bryce Kerril. He's a real idiot. Who knows what stupid thing he'll do next.'" Max said. "¿Sabes que va a hacer ahora?" Max said. "No, no lo hago." She said. "DI LA VERDAD O TE DESTRUISTE, WEEKND RECORDS!" Max said. "¡Realmente estoy siendo honesta!" She said. "Ok, guess there's no leads here. She's being honest." Max said. "I knew, I got the hint." I said. The elevator reformed and formed back to a seat. In the seat was Bryce himself. He passed out. Toilet paper was taped to his mouth. His hands are tied with a triple knot and his feet too. We ripped off the toilet paper. It was filled with a liquid. Water? Soda? Energy Drink? No… Chloroform! That must've taken him out. "What…" Max said. "What is going on?" "I…I don't… I don't know." Max then had a tranquilizer in his butt. As soon as I knew it, I ended up like him.
 
 ---
 
-<div class="chapter-title">Chapter 7: Kidnapped</div>
+<div class="chapter-title" id="chapter-7">Chapter 7: Kidnapped</div>
 
 "Uuuuuugh…" I said as I woke up. I was tied to a chair. The knife next to me was too far away. But it was closest to max. "Hey," I said. "Can you get me that?" "Nope." A voice said. He was right next to me. Bryce Kerril was on the floor. "What's going on?" I said. "Well, you guys are really good agents that we don't appreciate. We kidnapped you. And that guy. Bryce Kerril was a part of our formation. He double-crossed us when we had the plan set up. We also have proof that you two are the bad guys. Including Bryce." He said. Then he walked up to my face. "Well, let's make a deal first. You two join our company, we won't do anything to you. Say no, this button links to that reactor over there. And you blow up." He said. "No." I said. "Ok…" His hand was going straight for the little circle. Like a detonator. "WAIT!" Max screamed. "I will." "Yeah!" He said. He was going straight for his ropes and untied them. "Boi, Hav A Gweat Time!" He said. Max made a grin. Then he kicked him straight into a Refrigerator. He was now in the giant fridge. "No! I thought you shook on it!" He said. "I would never do something like that." Max said. He pushed the button on the detonator thing and threw it in the giant fridge. Then shut it. And Locked It 5 times really fast. "Get in his truck." Max said. "Take Bryce." "Huh?" Bryce said. We screamed. "Is he good and locked in there?" Bryce said. "Yep. But we gotta go. There's a detonator that is going to set off." Max said. "Oh Jeez. By the way, I'm going to stop working for them." Bryce said. "Why?" Max said. "They haven't given me my paycheck in 2 months."
 
 ---
 
-<div class="chapter-title">Chapter 8: Truck Discussion</div>
+<div class="chapter-title" id="chapter-8">Chapter 8: Truck Discussion</div>
 
 We ran out of the lab as fast as we could. No one was getting blown up… except the kidnapper. I got into the Driver Seat of the truck I drove when I took down the evil girl group. Bryce was on the side, doing something. I wanted to figure it out. I stretched to the passenger seat and looked at the sideview mirror and saw him spray painting the side of the truck. "Come on, no time for graffiti!" I said. But then I looked a little closer. He was painting the LVB logo. (Las Vegas Banks). Then went to the other side and painted it. "Hurry Up!" I yelled. "I'm Finishing!" Bryce yelled. Then he hopped into the passenger seat and put something into the GPS. It said <span class="computer-text">DIRECTING TO: THE LAS VEGAS MGM GRAND.</span> "Las Vegas?" I said. "We'll talk later, DRIVE!" Bryce said. I hit the gas pedal as hard as I could. The truck jumped over a cliff and the lab exploded. It looked like a cool action scene. As we were falling, I bumped into a hill, turned the car, rolled down the hill, grabbed my grapple hook, and threw myself out the car window. I taped the grapple hook to the front of the car and aimed towards the top of the mountain. Then I pressed the trigger. While the grapple was in the air, I swooped myself across the front to the driver's seat. Then I piled myself in the driver's seat. Then I went back to the seating position. The assassin was in the air and surprisingly alive. I put the car in reverse. "WHAT ARE YOU DOING???" Bryce yelled. "PUT ON YOUR SEATBELTS AND HOLD ON!" I yelled back. "THERE ARE NO SEATBELTS!" Bryce yelled. "THEN JUST HOLD ON!" I yelled. The rope between the grapple and the gun was on a string. A millisecond later it detached. Now we were in the air with the assassin. The assassin then got himself face-planted into the top of the truck. He deflected it as soon as it face-planted him into the top of the truck and then got piled in the fire fast. Now we were on our way to Las Vegas. "Do you know anything of what Cheatso Villianco is plotting?" I said. "Yes. But it's not them." Bryce said. "What?" I said, confused. I thought it was them the whole time. "So, when Las Vegas Casinos and Hotels were created, they wanted all the attention. 33 years after MGM Grand was opened, which is now, they have to raise $30,000,000 to buy a building and put it on top of the casino. We were working with them. Helping them get to their goal." Bryce said. "That's why you mentioned robbing Las Vegas banks." I said. "Well, anyway, 37 Hours and 6 seconds to go until we get to Las Vegas!"
 
 ---
 
-<div class="chapter-title">Chapter 9: Secret Identities</div>
+<div class="chapter-title" id="chapter-9">Chapter 9: Secret Identities</div>
 
 "Whoa." I said. There are lights all around me. After a day and 8 hours, we were finally here. There were ads for coke, Orlando, Mcdonalds, and Youtube. Then we finally got to MGM Grand. "Let's put on some suits with glasses." Bryce said. "And put some nametags on." I put on a nametag that said Josh Doleso, Max had one that said Leo Depri, and Bryce had the one that said Voluntad Ollie. "Your undercover first name is Spanish for Will? Can't you just say Will Ollie?" I said. "They gave us these name tags on Ebay." Bryce said. "Anyway, why were you working for the enemy?" Max said. "I got assassinated. They told me to tell them everything they know about rare website crypto." Bryce said. "What's that?" Max said. "Oh, it's the code inside code that says /relocate=/opposite= then the actual code. Then they had me join or they will hack the S.I.T. computers and schoolboard and put in website crypto in every piece of code in the school. I didn't want the school to suffer. I joined them as a mole." Bryce said. "And the paycheck stuff?" I said. "That was for real. I got here 2 months ago, and they haven't given me a paycheck. I thought I was gonna get money out of villainy." Bryce said. Then we were inside MGM Grand. There were a bunch of places where people were gambling, so it seemed like rush hour. "Oh, hello." a staff member said. "You are the bank?" "Yes, we are. We are delivering your 30 million dollars." Bryce said confidently. "Ok, please proceed to the Monster Gamble Machine." The staff member said. "Then when nobody is looking, press Passcode Input 2 times in a row, then enter MGM MGM Bank. Any other passwords you won't need." He handed us the passcode and we went off. We were heading toward the machine. "What is this machine anyway?" I said. "It's the ultimate gambling machine throughout Las Vegas. We helped them make it, and it could reward people at least $1,000,000." Bryce said. "1 million?"
 
 ---
 
-<div class="chapter-title">Chapter 10: Parkour and Secrets</div>
+<div class="chapter-title" id="chapter-10">Chapter 10: Parkour and Secrets</div>
 
 We were at the machine. No one was there. So we all were in line and Bryce went first. He pressed Passcode Input and entered MGM MGM and paused for a minute. He looked at his paper. Then he finished with the word B0-ss. Me and Max looked at each other and swiped our heads away from each other. When the seat flipped and the screen reset, we jumped in the hole with Bryce. Bryce landed like Spider-Man, I landed on my head, and Max landed on his bottom, in a gymnastics split. I helped Max get up, which sounded like a little kid crying that his ice cream melted. "Whoa." Bryce said, looking in front of him. There was lava, blocks on walls, blocks on string so they could float in the air and a gigantic screen in front of it all. I was very aware of this. This happens almost every mission I go on. Jumping, kicking, breakdancing, Dance fights, and other dangerous stuff. Now that I think of it, are Dance Fights dangerous? Wait, now I'm getting off track. I took out 3 Spy Sets and Deluxe Parkour. "Everyone takes 1." I said. I turned on my spy watch and got the Bullet Proof Vest, the Lava Proof Boots, the Jetpack, and X-Ray Sunglasses and put them over my clothes. I wasn't hot at all. We started by getting our grapple hooks and going on a wall block. My hook was zipping through the air. Then the hook was on the block. When I got closest, the hook fell off the block and I hit the wall with my back. It was the same exact thing with the others. I jumped to a block on a string. It spun like a boulder on a steep hill. I got my kitchen knife, and it sliced faster than sound. The block fell into the lava while I jumped. I landed on the top. The others landed on the same exact angle as me. I looked up and the assassin we faced was in front of me. "You're-You're ALIVE?!?!" I said. "Yes." The assassin said. "I landed on a kids bouncy house at a party. I popped it completely. Anyway, you will never thwart our plans." "It is devious, but I thought you would be against them." I said. "Oh, we are." The assassin said. "Who figured out our plan?" "I did." Max said. "What?" Bryce and I said. "You are against Las Vegas because of Operation Timmy Squad. So you want revenge. What better way to destroy your enemy than team up with their devious plots just to get the money for it? Las Vegas is owned by your undercover company 60-Quad. You own 60-Quad. Las Vegas is doing a scheme of when they have $30,000,000, they buy a building and put it on top of the casinos. You will want to steal the building and crush it up for money. At the end, only the casinos will be in Las Vegas and you steal their…. About $18,000,000,000." Max explained. The assassin's mouth grew wider throughout the explanation. "Also, Guess Who?" Max said. "You." the assassin said. "Two." Max threw a tissue full of chloroform at the assassin. The assassin passed out quickly. Max threw himself out of the pile and taped the tissue to the assassin and threw him in the lava. Then it started switching color. Then it disappeared, looking just like dirt on the walls. "It was a hologram?" Max said. "Oh, I forgot. Cheatso Villanco has holograms that look like you have to do parkour or something like that." Bryce said, sounding annoyed. "Anyway, I'm gonna start hacking into that big screen. He jogged towards it very fast. It said the account was "MGM Cheatso" and we needed to guess the password. "Cheatso Vilianco!" I screamed. "Cheatso Chase!" Max screamed back then we started making up names for what the password could possibly be. Bryce was typing something in and it looked like code. But not regular code- website crypto. He was typing in the website crypto then the code inside the passcode armory into some hack screen with a black background and green text. Then he hit enter on his keyboard. As soon as he hit enter, he grabbed a chip and another computer, so now there were 2 screens on 1 TV. On the first screen he was on google, but the second he was on that hack screen coding the chip. Then, when he was done, he hit enter, it started loading in (It only took an estimate to 5 seconds), after it was done loading, he took out the chip, closed the computer, and it was 1 screen on 1 TV. Bryce put the chip in as fast as he could. The screen was glitching from Google to DWG. I had a watch that knew everything, so I knew he could figure out what it was. I searched up DWG. It said, <span class="computer-text">DWG is a google that is for researching evil. The C.I.A. knows about this website, and it will be shut down in a few weeks because of our mole at cheatso villianco, bryce kerril. It stands for dark web googling.</span> Bryce typed in a website called MGM MGM. "Uh, you forgot the .com." I said. "You can search up anything on this website and it'll have 2 billion options!" Bryce said. It opened the MGM website. Bryce clicked the search button and typed in website crypto. It started glitching. Then it went to a Host screen. Bryce clicked heist, then searched on heist, then put in Operation Demonio. He clicked Operation Demonio then clicked Shut Down, and it was loading for 2 seconds then Operation Demonio was shut down.
 
@@ -139,13 +139,13 @@ We were at the machine. No one was there. So we all were in line and Bryce went 
 
 ---
 
-<div class="chapter-title">Chapter 11: Aftermath</div>
+<div class="chapter-title" id="chapter-11">Chapter 11: Aftermath</div>
 
 It was the end of our period. "Ok, class, time for the period to end!" Our Self-Preservation teacher said. I opened the door and walked past the room and opened my locker. It had a letter in it. It said "You and your team thwarted Operation Demonio. Turns out Bryce Kerril was a mole for Cheatso Villianco. He is giving us some important information. You have saved Las Vegas. Max, your new partner is useful too. He knows fluent Spanish, very long multiplication, and he figured out the plan of Operation Demonio! We think that your martial arts, Max's brilliant talents, and Bryce's Know-it-all stuff about the enemy, we will make you all official partners." I then stared into my locker. Then I heard something from my walkie-talkie. Then I ran straight towards the meeting room.
 
 ---
 
-<div class="about-section">
+<div class="about-section" id="about-the-author" markdown="1">
 
 ## About The Author:
 
