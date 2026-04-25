@@ -1,0 +1,4402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<title>Be An Animal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #0f1419; touch-action: none;
+    user-select: none; -webkit-user-select: none;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #game { display: block; position: absolute; top: 0; left: 0; }
+
+  #menu {
+    position: fixed; inset: 0; z-index: 10;
+    background:
+      radial-gradient(ellipse at top, #2d5a4a 0%, #1a3d3a 40%, #0f1f2a 100%);
+    color: #f4e9d8;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 30px; overflow-y: auto;
+  }
+  #menu h1 {
+    font-size: clamp(2.2rem, 9vw, 4rem);
+    margin: 18px 0 2px;
+    letter-spacing: 0.12em;
+    font-weight: 400;
+    color: #f4e9d8;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    font-family: 'Georgia', serif;
+  }
+  #menu .tag {
+    font-size: 0.85rem; letter-spacing: 0.35em;
+    text-transform: uppercase;
+    opacity: 0.6; margin-bottom: 28px;
+    font-family: -apple-system, sans-serif;
+  }
+  .animals {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 10px; width: 100%; max-width: 540px;
+  }
+  @media (min-width: 600px) { .animals { grid-template-columns: repeat(4, 1fr); } }
+
+  .card {
+    background: rgba(244, 233, 216, 0.06);
+    border: 1px solid rgba(244, 233, 216, 0.15);
+    border-radius: 3px;
+    padding: 12px 8px 10px; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border: 1px solid rgba(244, 233, 216, 0.08);
+    pointer-events: none;
+  }
+  .card:active {
+    transform: scale(0.97);
+    background: rgba(244, 233, 216, 0.14);
+    border-color: rgba(244, 233, 216, 0.4);
+  }
+  .card canvas { width: 100%; height: 78px; display: block; }
+  .card span {
+    font-size: 0.82rem; margin-top: 6px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+    opacity: 0.9;
+  }
+
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  #score {
+    position: absolute; top: 14px; left: 14px;
+    color: #fff; font-size: 1.3rem; font-weight: 600;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    font-family: -apple-system, sans-serif;
+    letter-spacing: 0.05em;
+  }
+  #hint {
+    position: absolute; top: 48px; left: 14px; right: 100px;
+    color: rgba(255,255,255,0.92); font-size: 0.78rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    font-family: -apple-system, sans-serif;
+    letter-spacing: 0.04em;
+  }
+  #menuBtn {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(0,0,0,0.45);
+    color: #f4e9d8; border: 1px solid rgba(244,233,216,0.45);
+    padding: 7px 14px; border-radius: 3px;
+    font-size: 0.75rem; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: auto; cursor: pointer;
+    font-family: -apple-system, sans-serif;
+    backdrop-filter: blur(4px);
+  }
+
+  .pad {
+    position: absolute; bottom: 22px;
+    display: flex; gap: 10px; pointer-events: auto;
+  }
+  .pad.left { left: 20px; }
+  .pad.right { right: 20px; }
+  .ctrl {
+    width: 58px; height: 58px;
+    background: rgba(244, 233, 216, 0.22);
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(244, 233, 216, 0.55);
+    border-radius: 50%;
+    color: #f4e9d8; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700;
+    user-select: none;
+    transition: transform 0.08s, background 0.08s;
+    font-family: -apple-system, sans-serif;
+  }
+  .ctrl:active {
+    background: rgba(244, 233, 216, 0.5);
+    transform: scale(0.88);
+  }
+  .ctrl small {
+    font-size: 0.55rem; letter-spacing: 0.1em;
+    position: absolute; bottom: -14px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    opacity: 0.85;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="menu">
+  <h1>BE AN ANIMAL</h1>
+  <div class="tag">choose your creature</div>
+  <div class="animals" id="cards"></div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="score">Score: 0</div>
+  <div id="hint"></div>
+  <button id="menuBtn">Menu</button>
+  <div class="pad left">
+    <div class="ctrl" data-key="left">&#9664;</div>
+    <div class="ctrl" data-key="right">&#9654;</div>
+  </div>
+  <div class="pad right">
+    <div class="ctrl" data-key="action">A<small>ACTION</small></div>
+    <div class="ctrl" data-key="up">&#9650;<small>JUMP</small></div>
+    <div class="ctrl hidden" data-key="down" id="diveBtn">&#9660;<small>DIVE</small></div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------- ANIMAL DRAWINGS ----------
+
+function drawFrog(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 28, 38, 5, 0, 0, Math.PI*2); c.fill();
+  // Back legs
+  c.fillStyle = '#3a7a3a';
+  c.beginPath(); c.ellipse(-22, 14, 18, 10, -0.35, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(22, 14, 18, 10, 0.35, 0, Math.PI*2); c.fill();
+  // Front legs
+  c.fillStyle = '#4a8a4a';
+  c.beginPath(); c.ellipse(-15, 18, 6, 4, 0.2, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(15, 18, 6, 4, -0.2, 0, Math.PI*2); c.fill();
+  // Body
+  c.fillStyle = '#5aa85a';
+  c.beginPath(); c.ellipse(0, 0, 32, 22, 0, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#c0dca0';
+  c.beginPath(); c.ellipse(0, 10, 22, 10, 0, 0, Math.PI*2); c.fill();
+  // Eye bumps
+  c.fillStyle = '#5aa85a';
+  c.beginPath(); c.arc(-14, -18, 11, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(14, -18, 11, 0, Math.PI*2); c.fill();
+  // Eye whites
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(-14, -20, 7, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(14, -20, 7, 0, Math.PI*2); c.fill();
+  // Pupils
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(-14, -20, 3.5, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(14, -20, 3.5, 0, Math.PI*2); c.fill();
+  // Mouth
+  c.strokeStyle = '#2a5a2a'; c.lineWidth = 2;
+  c.beginPath(); c.arc(0, -2, 14, 0.15, Math.PI - 0.15); c.stroke();
+  // Spots
+  c.fillStyle = '#3a7a3a';
+  c.beginPath(); c.arc(-20, -5, 3, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(20, -5, 3, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(0, -8, 2.5, 0, Math.PI*2); c.fill();
+  // Tongue
+  if (action > 0) {
+    c.strokeStyle = '#ff6688'; c.lineWidth = 5; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(5, 5);
+    c.quadraticCurveTo(30, -5 - action*15, 15 + action*55, -25 - action*20);
+    c.stroke();
+    c.fillStyle = '#ff3366';
+    c.beginPath(); c.arc(15 + action*55, -25 - action*20, 4, 0, Math.PI*2); c.fill();
+  }
+  c.restore();
+}
+
+function drawSnake(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.2)';
+  c.beginPath(); c.ellipse(-30, 15, 60, 4, 0, 0, Math.PI*2); c.fill();
+  const segs = 11;
+  for (let i = segs - 1; i >= 0; i--) {
+    const sx = -i * 13;
+    const sy = Math.sin(t * 0.015 + i * 0.6) * 7;
+    const r = 13 - i * 0.6;
+    c.fillStyle = i % 2 ? '#4a9044' : '#5aa84a';
+    c.beginPath(); c.arc(sx, sy, r, 0, Math.PI*2); c.fill();
+    // Diamond pattern
+    if (i % 2 === 0 && i < segs - 1) {
+      c.fillStyle = '#2a5a2a';
+      c.beginPath(); c.arc(sx, sy - 2, 3, 0, Math.PI*2); c.fill();
+    }
+  }
+  // Head
+  c.fillStyle = '#6ab85a';
+  c.beginPath(); c.ellipse(10, Math.sin(t * 0.015) * 7, 18, 13, 0, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(18, Math.sin(t * 0.015) * 7 - 5, 3.5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(19, Math.sin(t * 0.015) * 7 - 5, 2, 0, Math.PI*2); c.fill();
+  // Forked tongue flickers
+  if (Math.sin(t * 0.04) > 0.3 || action > 0) {
+    c.strokeStyle = '#ff2266'; c.lineWidth = 2; c.lineCap = 'round';
+    const ty = Math.sin(t * 0.015) * 7;
+    c.beginPath();
+    c.moveTo(26, ty + 2);
+    c.lineTo(36, ty);
+    c.lineTo(40, ty - 3);
+    c.moveTo(36, ty);
+    c.lineTo(40, ty + 3);
+    c.stroke();
+  }
+  // Nostril
+  c.fillStyle = '#2a5a2a';
+  c.beginPath(); c.arc(24, Math.sin(t * 0.015) * 7 - 1, 1, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawTurtle(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 22, 42, 5, 0, 0, Math.PI*2); c.fill();
+  // Legs animate
+  const lw = Math.sin(t * 0.08) * 2;
+  c.fillStyle = '#7a9a3a';
+  c.beginPath(); c.ellipse(-24 + lw, 16, 9, 6, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(24 - lw, 16, 9, 6, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(-17 - lw, 19, 7, 5, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(17 + lw, 19, 7, 5, 0, 0, Math.PI*2); c.fill();
+  // Tail
+  c.fillStyle = '#7a9a3a';
+  c.beginPath();
+  c.moveTo(-26, 3); c.lineTo(-36, 7); c.lineTo(-30, 12); c.closePath(); c.fill();
+  // Head (extended unless hiding)
+  const headOut = action ? 0.3 : 1;
+  c.fillStyle = '#9ab853';
+  c.beginPath(); c.ellipse(25 * headOut + 5, -4, 13 * headOut + 2, 10 * headOut + 2, 0, 0, Math.PI*2); c.fill();
+  if (headOut > 0.5) {
+    // Eye
+    c.fillStyle = 'white';
+    c.beginPath(); c.arc(33, -7, 3, 0, Math.PI*2); c.fill();
+    c.fillStyle = 'black';
+    c.beginPath(); c.arc(34, -7, 1.5, 0, Math.PI*2); c.fill();
+    // Mouth
+    c.strokeStyle = '#5a7a2a'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(31, -1); c.lineTo(38, 0); c.stroke();
+  }
+  // Shell dome
+  c.fillStyle = '#8a5a33';
+  c.beginPath(); c.ellipse(0, -2, 30, 20, 0, 0, Math.PI*2); c.fill();
+  // Shell highlight
+  c.fillStyle = '#a87a4a';
+  c.beginPath(); c.ellipse(-5, -8, 18, 8, -0.2, 0, Math.PI*2); c.fill();
+  // Hexagonal pattern
+  c.strokeStyle = '#5a3a1a'; c.lineWidth = 1.5;
+  c.fillStyle = 'rgba(90, 58, 26, 0.4)';
+  const hexes = [[0, -10], [-13, -3], [13, -3], [-7, 7], [7, 7], [0, 0]];
+  hexes.forEach(([hx, hy]) => {
+    c.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = i * Math.PI / 3;
+      const px = hx + Math.cos(a) * 6;
+      const py = hy + Math.sin(a) * 5;
+      if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
+    }
+    c.closePath(); c.fill(); c.stroke();
+  });
+  c.restore();
+}
+
+function drawWhale(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Tail flukes
+  c.fillStyle = '#3a6b9f';
+  c.beginPath();
+  c.moveTo(-42, -2);
+  c.quadraticCurveTo(-60, -18, -68, -20);
+  c.quadraticCurveTo(-58, -8, -55, 0);
+  c.quadraticCurveTo(-58, 8, -68, 20);
+  c.quadraticCurveTo(-60, 18, -42, 2);
+  c.closePath(); c.fill();
+  // Body
+  c.fillStyle = '#4a7cb4';
+  c.beginPath(); c.ellipse(0, 0, 48, 28, 0, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#c0d8ec';
+  c.beginPath(); c.ellipse(0, 14, 40, 10, 0, 0, Math.PI*2); c.fill();
+  // Belly grooves
+  c.strokeStyle = '#8ab8dc'; c.lineWidth = 1;
+  for (let i = -2; i <= 2; i++) {
+    c.beginPath(); c.moveTo(-20 + i * 8, 5); c.lineTo(-20 + i * 8, 20); c.stroke();
+  }
+  // Top fin
+  c.fillStyle = '#3a6b9f';
+  c.beginPath();
+  c.moveTo(0, -24);
+  c.quadraticCurveTo(-5, -38, -10, -28);
+  c.lineTo(8, -22);
+  c.closePath(); c.fill();
+  // Side fin
+  c.beginPath();
+  c.ellipse(-12, 14, 14, 6, 0.6, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(24, -4, 3.5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(26, -4, 1.8, 0, Math.PI*2); c.fill();
+  // Mouth
+  c.strokeStyle = '#2a4a78'; c.lineWidth = 2.5;
+  c.beginPath();
+  c.moveTo(15, 10);
+  c.quadraticCurveTo(30, 14, 44, 8);
+  c.stroke();
+  // Blowhole spout
+  if (action > 0) {
+    c.fillStyle = 'rgba(180, 210, 240, 0.85)';
+    c.beginPath();
+    c.ellipse(-5, -40 - action * 20, 4 + action * 3, 18 + action * 15, 0, 0, Math.PI*2);
+    c.fill();
+    for (let i = 0; i < 5; i++) {
+      c.beginPath();
+      c.arc(-5 + Math.sin(t * 0.3 + i) * 8, -50 - action * 30 - i * 8, 3, 0, Math.PI*2);
+      c.fill();
+    }
+  }
+  c.restore();
+}
+
+function drawElephant(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 42, 55, 6, 0, 0, Math.PI*2); c.fill();
+  // Back legs
+  c.fillStyle = '#7a7a80';
+  c.fillRect(-32, 8, 13, 34);
+  c.fillRect(-14, 8, 13, 34);
+  // Front legs
+  c.fillStyle = '#8a8a90';
+  c.fillRect(8, 8, 13, 34);
+  c.fillRect(26, 8, 13, 34);
+  // Toenails
+  c.fillStyle = '#f0e8d8';
+  [-25, -7, 15, 33].forEach(lx => {
+    c.beginPath(); c.arc(lx, 41, 3.5, 0, Math.PI*2); c.fill();
+  });
+  // Body
+  c.fillStyle = '#98989e';
+  c.beginPath(); c.ellipse(0, -6, 45, 27, 0, 0, Math.PI*2); c.fill();
+  // Tail
+  c.strokeStyle = '#7a7a80'; c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(-42, -12); c.quadraticCurveTo(-52, 0, -55, 10); c.stroke();
+  c.fillStyle = '#5a5a60';
+  c.beginPath(); c.arc(-55, 10, 4, 0, Math.PI*2); c.fill();
+  // Head
+  c.fillStyle = '#a0a0a6';
+  c.beginPath(); c.ellipse(40, -18, 24, 24, 0, 0, Math.PI*2); c.fill();
+  // Ear
+  c.fillStyle = '#8a8a90';
+  c.beginPath(); c.ellipse(28, -26, 17, 22, -0.35, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#a8a8ae';
+  c.beginPath(); c.ellipse(30, -25, 12, 17, -0.35, 0, Math.PI*2); c.fill();
+  // Trunk - curls up when action
+  c.strokeStyle = '#98989e'; c.lineWidth = 13; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(58, -10);
+  if (action > 0) {
+    c.quadraticCurveTo(75, 5 - action * 20, 70 - action * 5, -20 - action * 25);
+  } else {
+    c.quadraticCurveTo(72, 10, 66, 28);
+  }
+  c.stroke();
+  // Trunk tip
+  c.lineWidth = 3;
+  c.beginPath();
+  if (action > 0) {
+    c.moveTo(70 - action * 5, -20 - action * 25);
+    c.lineTo(73 - action * 5, -18 - action * 25);
+  } else {
+    c.moveTo(66, 28); c.lineTo(70, 30);
+  }
+  c.stroke();
+  // Tusks
+  c.fillStyle = '#f4ead4';
+  c.beginPath();
+  c.moveTo(48, -2); c.quadraticCurveTo(56, 6, 52, 12);
+  c.lineTo(47, 8); c.closePath(); c.fill();
+  c.strokeStyle = '#d4c0a0'; c.lineWidth = 0.8; c.stroke();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(44, -22, 3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(45, -22, 1.5, 0, Math.PI*2); c.fill();
+  // Wrinkles
+  c.strokeStyle = '#7a7a80'; c.lineWidth = 0.8;
+  c.beginPath(); c.moveTo(62, -5); c.lineTo(67, -7); c.stroke();
+  c.beginPath(); c.moveTo(62, 2); c.lineTo(68, 0); c.stroke();
+  c.restore();
+}
+
+function drawGiraffe(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 65, 40, 5, 0, 0, Math.PI*2); c.fill();
+  // Legs
+  c.fillStyle = '#e8b064';
+  c.fillRect(-24, 20, 9, 45);
+  c.fillRect(-10, 20, 9, 45);
+  c.fillRect(6, 20, 9, 45);
+  c.fillRect(22, 20, 9, 45);
+  // Hooves
+  c.fillStyle = '#3a2414';
+  [-24, -10, 6, 22].forEach(lx => c.fillRect(lx, 63, 9, 4));
+  // Body
+  c.fillStyle = '#f0bc6c';
+  c.beginPath(); c.ellipse(0, 5, 32, 20, 0, 0, Math.PI*2); c.fill();
+  // Body spots
+  c.fillStyle = '#8a5420';
+  [[-18, 0], [-8, 10], [4, 0], [16, 8], [-22, 10], [10, 14], [22, 2], [-14, 18]].forEach(([sx, sy]) => {
+    c.beginPath();
+    c.ellipse(sx, sy, 4.5, 3.5, Math.random() * 0.5, 0, Math.PI*2);
+    c.fill();
+  });
+  // Neck (bends with action)
+  c.fillStyle = '#f0bc6c';
+  const neckBend = action ? 15 : 0;
+  c.save();
+  c.translate(18, -10);
+  c.rotate(action ? 0.3 : 0);
+  c.fillRect(0, -50, 12, 55);
+  // Neck spots
+  c.fillStyle = '#8a5420';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath(); c.arc(6, -44 + i * 13, 3, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(2, -38 + i * 13, 2, 0, Math.PI*2); c.fill();
+  }
+  // Mane
+  c.strokeStyle = '#6a3a14'; c.lineWidth = 2.5;
+  for (let i = 0; i < 6; i++) {
+    c.beginPath();
+    c.moveTo(0, -45 + i * 9);
+    c.lineTo(-5, -48 + i * 9);
+    c.stroke();
+  }
+  // Head
+  c.fillStyle = '#f0bc6c';
+  c.beginPath(); c.ellipse(15, -55, 15, 10, 0.15, 0, Math.PI*2); c.fill();
+  // Snout
+  c.fillStyle = '#e8a858';
+  c.beginPath(); c.ellipse(24, -52, 8, 6, 0.15, 0, Math.PI*2); c.fill();
+  // Ossicones
+  c.strokeStyle = '#f0bc6c'; c.lineWidth = 4; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(8, -60); c.lineTo(6, -72); c.stroke();
+  c.beginPath(); c.moveTo(14, -62); c.lineTo(13, -74); c.stroke();
+  c.fillStyle = '#3a2414';
+  c.beginPath(); c.arc(6, -73, 3, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(13, -75, 3, 0, Math.PI*2); c.fill();
+  // Ear
+  c.fillStyle = '#e8a858';
+  c.beginPath(); c.ellipse(5, -60, 5, 3, -0.4, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(18, -58, 2.2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(19, -58, 1.2, 0, Math.PI*2); c.fill();
+  // Nostril
+  c.fillStyle = '#3a2414';
+  c.beginPath(); c.arc(29, -53, 1, 0, Math.PI*2); c.fill();
+  c.restore();
+  // Tail
+  c.strokeStyle = '#f0bc6c'; c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(-30, 10);
+  c.quadraticCurveTo(-38, 22, -36, 30 + Math.sin(t * 0.1) * 3);
+  c.stroke();
+  c.fillStyle = '#3a2414';
+  c.beginPath(); c.arc(-36, 32 + Math.sin(t * 0.1) * 3, 4, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawRaptor(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 32, 45, 5, 0, 0, Math.PI*2); c.fill();
+  // Tail
+  const tailWag = Math.sin(t * 0.08) * 6;
+  c.fillStyle = '#3a5a2a';
+  c.beginPath();
+  c.moveTo(-18, -2);
+  c.quadraticCurveTo(-45, -8 + tailWag, -72, 2 + tailWag);
+  c.lineTo(-72, 8 + tailWag);
+  c.quadraticCurveTo(-45, 2 + tailWag, -18, 6);
+  c.closePath(); c.fill();
+  // Tail feathers
+  c.fillStyle = '#2a4a1a';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.ellipse(-35 - i * 8, -2 + tailWag * 0.7, 6, 2, -0.3, 0, Math.PI*2);
+    c.fill();
+  }
+  // Running legs
+  const leg1 = Math.sin(t * 0.15) * 8;
+  const leg2 = Math.sin(t * 0.15 + Math.PI) * 8;
+  c.fillStyle = '#4a7a3a';
+  // Right leg
+  c.beginPath();
+  c.moveTo(2, 5); c.lineTo(-3 + leg1, 18); c.lineTo(3 + leg1, 30);
+  c.lineTo(14 + leg1, 30); c.lineTo(10, 20); c.lineTo(10, 8);
+  c.closePath(); c.fill();
+  // Left leg
+  c.beginPath();
+  c.moveTo(-4, 5); c.lineTo(-10 + leg2, 18); c.lineTo(-4 + leg2, 30);
+  c.lineTo(7 + leg2, 30); c.lineTo(3, 20); c.lineTo(3, 8);
+  c.closePath(); c.fill();
+  // Foot claws
+  c.fillStyle = 'black';
+  c.beginPath(); c.moveTo(14 + leg1, 30); c.lineTo(18 + leg1, 32); c.lineTo(14 + leg1, 32); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(7 + leg2, 30); c.lineTo(11 + leg2, 32); c.lineTo(7 + leg2, 32); c.closePath(); c.fill();
+  // Body
+  c.fillStyle = '#5a8a3a';
+  c.beginPath(); c.ellipse(0, -10, 22, 16, -0.15, 0, Math.PI*2); c.fill();
+  // Feather back
+  c.fillStyle = '#3a6a2a';
+  c.beginPath(); c.ellipse(-8, -18, 16, 5, -0.25, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#2a5a1a';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.ellipse(-15 + i * 4, -22, 3, 1.5, -0.5, 0, Math.PI*2); c.fill();
+  }
+  // Arms
+  c.fillStyle = '#5a8a3a';
+  c.beginPath(); c.ellipse(8, -3, 7, 3, 0.35, 0, Math.PI*2); c.fill();
+  // Hand claws
+  c.strokeStyle = 'white'; c.lineWidth = 1.2;
+  c.beginPath(); c.moveTo(13, -1); c.lineTo(19, -3); c.stroke();
+  c.beginPath(); c.moveTo(13, 0); c.lineTo(19, 0); c.stroke();
+  // Neck
+  c.fillStyle = '#6a9a4a';
+  c.beginPath(); c.ellipse(12, -18, 8, 10, 0.3, 0, Math.PI*2); c.fill();
+  // Head
+  c.fillStyle = '#6a9a4a';
+  c.beginPath(); c.ellipse(24, -25, 18, 11, 0.05, 0, Math.PI*2); c.fill();
+  // Snout
+  c.beginPath();
+  c.moveTo(36, -28); c.lineTo(45, -22); c.lineTo(36, -20);
+  c.closePath(); c.fill();
+  // Teeth
+  c.fillStyle = 'white';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.moveTo(28 + i * 3, -22);
+    c.lineTo(29 + i * 3, -18);
+    c.lineTo(30 + i * 3, -22);
+    c.closePath(); c.fill();
+  }
+  // Eye
+  c.fillStyle = '#ffd835';
+  c.beginPath(); c.arc(27, -28, 2.8, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(28, -28, 1.3, 0, Math.PI*2); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(40, -25, 1, 0, Math.PI*2); c.fill();
+  // Head feathers
+  c.strokeStyle = '#2a5a1a'; c.lineWidth = 2; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(16, -34); c.lineTo(12, -42); c.stroke();
+  c.beginPath(); c.moveTo(22, -36); c.lineTo(20, -45); c.stroke();
+  // Action speed lines
+  if (action > 0) {
+    c.strokeStyle = 'rgba(255,255,255,0.6)'; c.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      c.beginPath();
+      c.moveTo(-30 - i * 8, -15 + i * 5);
+      c.lineTo(-50 - i * 8, -15 + i * 5);
+      c.stroke();
+    }
+  }
+  c.restore();
+}
+
+function drawTrex(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath(); c.ellipse(0, 52, 62, 7, 0, 0, Math.PI*2); c.fill();
+  // Tail (thick muscular)
+  c.fillStyle = '#5a4228';
+  c.beginPath();
+  c.moveTo(-22, -2);
+  c.quadraticCurveTo(-55, -22, -92, -8);
+  c.lineTo(-92, 3);
+  c.quadraticCurveTo(-55, -3, -22, 18);
+  c.closePath(); c.fill();
+  // Tail stripes
+  c.fillStyle = '#3a2a18';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.ellipse(-40 - i * 12, -10 + i * 2, 6, 3, -0.3, 0, Math.PI*2);
+    c.fill();
+  }
+  // Back leg (further)
+  c.fillStyle = '#6a5234';
+  c.beginPath();
+  c.moveTo(-12, 3); c.lineTo(-22, 35); c.lineTo(-8, 52);
+  c.lineTo(14, 52); c.lineTo(10, 25); c.lineTo(8, 10);
+  c.closePath(); c.fill();
+  // Front leg (closer)
+  c.fillStyle = '#7a6244';
+  c.beginPath();
+  c.moveTo(8, 8); c.lineTo(-2, 40); c.lineTo(12, 52);
+  c.lineTo(32, 52); c.lineTo(26, 28); c.lineTo(24, 12);
+  c.closePath(); c.fill();
+  // Foot claws
+  c.fillStyle = 'white';
+  [[-8, 52], [4, 52], [14, 52], [22, 52], [32, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 3, fy + 6); c.lineTo(fx + 6, fy);
+    c.closePath(); c.fill();
+  });
+  // Body
+  c.fillStyle = '#6a5234';
+  c.beginPath(); c.ellipse(0, -10, 46, 32, -0.08, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#9a8254';
+  c.beginPath(); c.ellipse(5, 12, 35, 10, 0, 0, Math.PI*2); c.fill();
+  // Tiny arms
+  c.fillStyle = '#5a4228';
+  c.beginPath(); c.ellipse(22, 2, 10, 4, 0.4, 0, Math.PI*2); c.fill();
+  // Tiny claws
+  c.fillStyle = 'white'; c.strokeStyle = 'white'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(30, 4); c.lineTo(34, 3); c.stroke();
+  c.beginPath(); c.moveTo(30, 6); c.lineTo(34, 7); c.stroke();
+  // Back spikes
+  c.fillStyle = '#3a2a18';
+  for (let i = 0; i < 6; i++) {
+    c.beginPath();
+    c.moveTo(-30 + i * 10, -35 + i * 1.5);
+    c.lineTo(-28 + i * 10, -42 + i * 1.5);
+    c.lineTo(-26 + i * 10, -35 + i * 1.5);
+    c.closePath(); c.fill();
+  }
+  // Head (massive)
+  c.fillStyle = '#7a6244';
+  c.beginPath(); c.ellipse(36, -30, 32, 24, -0.02, 0, Math.PI*2); c.fill();
+  // Jaw (opens with action)
+  const jawOpen = action ? 18 : 4;
+  c.fillStyle = '#5a4228';
+  c.beginPath();
+  c.moveTo(18, -22);
+  c.lineTo(68, -22 + jawOpen * 0.3);
+  c.lineTo(68, -16 + jawOpen);
+  c.lineTo(18, -14);
+  c.closePath(); c.fill();
+  // Mouth interior
+  if (action) {
+    c.fillStyle = '#3a0000';
+    c.beginPath();
+    c.moveTo(24, -20); c.lineTo(64, -20 + jawOpen * 0.3);
+    c.lineTo(64, -18 + jawOpen); c.lineTo(24, -16);
+    c.closePath(); c.fill();
+  }
+  // Upper teeth
+  c.fillStyle = 'white';
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.moveTo(23 + i * 6, -22);
+    c.lineTo(25 + i * 6, -14);
+    c.lineTo(27 + i * 6, -22);
+    c.closePath(); c.fill();
+  }
+  // Lower teeth
+  for (let i = 0; i < 6; i++) {
+    c.beginPath();
+    c.moveTo(26 + i * 7, -14 + jawOpen);
+    c.lineTo(28 + i * 7, -22 + jawOpen);
+    c.lineTo(30 + i * 7, -14 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // Eye
+  c.fillStyle = '#ffd835';
+  c.beginPath(); c.arc(42, -38, 3.5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(43, -38, 1.2, 2.5, 0, 0, Math.PI*2); c.fill();
+  // Heavy brow
+  c.fillStyle = '#3a2a18';
+  c.beginPath();
+  c.moveTo(34, -46); c.lineTo(52, -42); c.lineTo(48, -38); c.lineTo(34, -42);
+  c.closePath(); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(62, -32, 1.8, 0, Math.PI*2); c.fill();
+  // Roar lines
+  if (action > 0) {
+    c.strokeStyle = 'rgba(255,220,180,0.7)'; c.lineWidth = 2.5;
+    for (let i = 0; i < 4; i++) {
+      c.beginPath();
+      c.moveTo(75 + i * 6, -22 + i * 6);
+      c.lineTo(90 + i * 8, -22 + i * 6);
+      c.stroke();
+    }
+  }
+  c.restore();
+}
+
+function drawStegosaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const step = Math.sin(t * 0.15) * 1.5;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath(); c.ellipse(0, 52, 78, 7, 0, 0, Math.PI*2); c.fill();
+  // Tail (swings with action)
+  const tailSwing = action ? Math.sin(t * 0.6) * 10 : Math.sin(t * 0.1) * 2;
+  c.fillStyle = '#6a7a48';
+  c.beginPath();
+  c.moveTo(-28, 2);
+  c.quadraticCurveTo(-72, -5 + tailSwing, -108, 12 + tailSwing);
+  c.lineTo(-108, 22 + tailSwing);
+  c.quadraticCurveTo(-72, 10 + tailSwing, -28, 22);
+  c.closePath(); c.fill();
+  // Thagomizer (4 tail spikes)
+  c.fillStyle = '#d8c898';
+  const tipX = -102, tipY = 12 + tailSwing;
+  for (let i = 0; i < 4; i++) {
+    const ang = -0.9 + i * 0.5;
+    const spX = tipX + Math.cos(ang) * -18;
+    const spY = tipY + Math.sin(ang) * 16;
+    c.beginPath();
+    c.moveTo(tipX + i * -2, tipY + 1);
+    c.lineTo(spX, spY);
+    c.lineTo(tipX + i * -2 - 4, tipY - 3);
+    c.closePath();
+    c.fill();
+  }
+  c.strokeStyle = '#8a7a58'; c.lineWidth = 1;
+  for (let i = 0; i < 4; i++) {
+    const ang = -0.9 + i * 0.5;
+    const spX = tipX + Math.cos(ang) * -18;
+    const spY = tipY + Math.sin(ang) * 16;
+    c.beginPath();
+    c.moveTo(tipX + i * -2 - 1, tipY);
+    c.lineTo(spX, spY);
+    c.stroke();
+  }
+  // Back legs (stocky)
+  c.fillStyle = '#5a6a38';
+  c.beginPath();
+  c.moveTo(-22, 8); c.lineTo(-28, 30 + step); c.lineTo(-16, 52);
+  c.lineTo(2, 52); c.lineTo(-2, 30); c.lineTo(-6, 12);
+  c.closePath(); c.fill();
+  // Front legs
+  c.fillStyle = '#6a7a48';
+  c.beginPath();
+  c.moveTo(20, 10); c.lineTo(14, 32 - step); c.lineTo(26, 52);
+  c.lineTo(42, 52); c.lineTo(38, 30); c.lineTo(32, 14);
+  c.closePath(); c.fill();
+  // Toe nails
+  c.fillStyle = '#3a2a18';
+  [[-14, 52], [0, 52], [28, 52], [40, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.arc(fx, fy + 1, 2, 0, Math.PI); c.fill();
+  });
+  // Body (arched back)
+  c.fillStyle = '#7a8a58';
+  c.beginPath();
+  c.moveTo(-28, 2);
+  c.quadraticCurveTo(-20, -28, 0, -30);
+  c.quadraticCurveTo(22, -28, 30, -10);
+  c.quadraticCurveTo(35, 10, 25, 22);
+  c.lineTo(-22, 22);
+  c.quadraticCurveTo(-34, 15, -28, 2);
+  c.closePath(); c.fill();
+  // Belly
+  c.fillStyle = '#a8b878';
+  c.beginPath(); c.ellipse(2, 18, 30, 6, 0, 0, Math.PI*2); c.fill();
+  // Back plates (alternating two rows)
+  const plates = [
+    { x: -24, w: 12, h: 18, off: 1 },
+    { x: -10, w: 16, h: 26, off: 0 },
+    { x: 4, w: 18, h: 30, off: 1 },
+    { x: 18, w: 16, h: 26, off: 0 },
+    { x: 30, w: 12, h: 18, off: 1 }
+  ];
+  plates.forEach(p => {
+    // Main plate
+    c.fillStyle = p.off ? '#b04838' : '#c85848';
+    c.beginPath();
+    c.moveTo(p.x - p.w/2, -25);
+    c.quadraticCurveTo(p.x - p.w/4, -25 - p.h, p.x, -25 - p.h);
+    c.quadraticCurveTo(p.x + p.w/4, -25 - p.h, p.x + p.w/2, -25);
+    c.closePath(); c.fill();
+    // Shadow on plate
+    c.fillStyle = p.off ? '#802820' : '#903828';
+    c.beginPath();
+    c.moveTo(p.x - p.w/2, -25);
+    c.quadraticCurveTo(p.x - p.w/3, -25 - p.h*0.7, p.x - 1, -25 - p.h*0.5);
+    c.quadraticCurveTo(p.x - p.w/4, -25 - p.h*0.3, p.x - p.w/2, -25);
+    c.closePath(); c.fill();
+  });
+  // Head (small, held low)
+  c.fillStyle = '#6a7a48';
+  c.beginPath(); c.ellipse(44, 8, 18, 12, -0.1, 0, Math.PI*2); c.fill();
+  // Snout
+  c.beginPath(); c.ellipse(58, 12, 10, 7, 0, 0, Math.PI*2); c.fill();
+  // Beak
+  c.fillStyle = '#3a2a18';
+  c.beginPath();
+  c.moveTo(62, 9); c.lineTo(68, 13); c.lineTo(62, 17);
+  c.closePath(); c.fill();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(49, 4, 2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(49, 4, 1, 0, Math.PI*2); c.fill();
+  // Skin bumps
+  c.fillStyle = 'rgba(50, 60, 30, 0.4)';
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.arc(-28 + i * 8, 12 + Math.sin(i) * 3, 1.4, 0, Math.PI*2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawSpinosaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const stride = Math.sin(t * 0.2) * 3;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.25)';
+  c.beginPath(); c.ellipse(0, 52, 72, 6, 0, 0, Math.PI*2); c.fill();
+  // Tail (long, flattened)
+  const tailWave = Math.sin(t * 0.15) * 4;
+  c.fillStyle = '#6a2a38';
+  c.beginPath();
+  c.moveTo(-22, 0);
+  c.quadraticCurveTo(-60, -6 + tailWave, -98, 8 + tailWave);
+  c.lineTo(-108, 14 + tailWave);
+  c.lineTo(-98, 22 + tailWave);
+  c.quadraticCurveTo(-60, 12 + tailWave, -22, 18);
+  c.closePath(); c.fill();
+  // Tail tip fin
+  c.fillStyle = '#4a1a28';
+  c.beginPath();
+  c.moveTo(-96, 6 + tailWave);
+  c.lineTo(-118, -4 + tailWave);
+  c.lineTo(-110, 14 + tailWave);
+  c.lineTo(-118, 28 + tailWave);
+  c.lineTo(-96, 22 + tailWave);
+  c.closePath(); c.fill();
+  // Back leg (far)
+  c.fillStyle = '#5a1a28';
+  c.beginPath();
+  c.moveTo(-10, 5); c.lineTo(-18 + stride, 32); c.lineTo(-8 + stride, 52);
+  c.lineTo(10 + stride, 52); c.lineTo(8, 30); c.lineTo(6, 10);
+  c.closePath(); c.fill();
+  // Front leg (close)
+  c.fillStyle = '#7a2a38';
+  c.beginPath();
+  c.moveTo(12, 10); c.lineTo(4 - stride, 36); c.lineTo(16 - stride, 52);
+  c.lineTo(32 - stride, 52); c.lineTo(28, 30); c.lineTo(22, 12);
+  c.closePath(); c.fill();
+  // Foot claws
+  c.fillStyle = 'white';
+  [[-4 + stride, 52], [6 + stride, 52], [18 - stride, 52], [28 - stride, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 3, fy + 5); c.lineTo(fx + 6, fy);
+    c.closePath(); c.fill();
+  });
+  // Sail (iconic crescent)
+  const sailGrad = c.createLinearGradient(0, -75, 0, -5);
+  sailGrad.addColorStop(0, '#a84858');
+  sailGrad.addColorStop(1, '#6a1a28');
+  c.fillStyle = sailGrad;
+  c.beginPath();
+  c.moveTo(-22, -2);
+  c.bezierCurveTo(-20, -55, -5, -78, 8, -78);
+  c.bezierCurveTo(22, -78, 32, -50, 30, -8);
+  c.closePath(); c.fill();
+  // Sail stripes
+  c.strokeStyle = 'rgba(50, 10, 20, 0.7)'; c.lineWidth = 2;
+  for (let i = 0; i < 6; i++) {
+    const baseX = -20 + i * 9;
+    c.beginPath();
+    c.moveTo(baseX, -6);
+    c.quadraticCurveTo(baseX + 2, -45, baseX + 4, -72 + Math.abs(i - 3) * 4);
+    c.stroke();
+  }
+  // Sail edge highlight
+  c.strokeStyle = '#c85868'; c.lineWidth = 1.5;
+  c.beginPath();
+  c.moveTo(-22, -4);
+  c.bezierCurveTo(-20, -55, -5, -76, 8, -76);
+  c.stroke();
+  // Body
+  c.fillStyle = '#7a2a38';
+  c.beginPath(); c.ellipse(0, -2, 42, 22, -0.05, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#c0887c';
+  c.beginPath(); c.ellipse(2, 15, 32, 7, 0, 0, Math.PI*2); c.fill();
+  // Tiny arms with claws
+  c.fillStyle = '#5a1a28';
+  c.beginPath(); c.ellipse(22, 8, 10, 4, 0.35, 0, Math.PI*2); c.fill();
+  c.strokeStyle = 'white'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(30, 6); c.lineTo(35, 4); c.stroke();
+  c.beginPath(); c.moveTo(30, 9); c.lineTo(35, 10); c.stroke();
+  c.beginPath(); c.moveTo(30, 11); c.lineTo(34, 13); c.stroke();
+  // Head
+  c.fillStyle = '#7a2a38';
+  c.beginPath(); c.ellipse(32, -28, 18, 12, -0.05, 0, Math.PI*2); c.fill();
+  // Long crocodile snout
+  const jawOpen = action ? 9 : 1;
+  c.fillStyle = '#6a2030';
+  c.beginPath();
+  c.moveTo(40, -32);
+  c.lineTo(86, -29);
+  c.lineTo(88, -24 - jawOpen * 0.3);
+  c.lineTo(40, -22);
+  c.closePath(); c.fill();
+  // Lower jaw
+  c.fillStyle = '#8a3a48';
+  c.beginPath();
+  c.moveTo(40, -21);
+  c.lineTo(86, -19 + jawOpen);
+  c.lineTo(88, -15 + jawOpen);
+  c.lineTo(40, -15 + jawOpen * 0.3);
+  c.closePath(); c.fill();
+  // Mouth interior
+  if (action) {
+    c.fillStyle = '#3a0010';
+    c.beginPath();
+    c.moveTo(46, -22);
+    c.lineTo(82, -22);
+    c.lineTo(82, -18 + jawOpen);
+    c.lineTo(46, -17 + jawOpen * 0.3);
+    c.closePath(); c.fill();
+  }
+  // Upper teeth (conical)
+  c.fillStyle = 'white';
+  for (let i = 0; i < 10; i++) {
+    c.beginPath();
+    c.moveTo(44 + i * 4, -22);
+    c.lineTo(45 + i * 4, -15);
+    c.lineTo(46 + i * 4, -22);
+    c.closePath(); c.fill();
+  }
+  // Lower teeth
+  for (let i = 0; i < 9; i++) {
+    c.beginPath();
+    c.moveTo(46 + i * 4, -16 + jawOpen * 0.3);
+    c.lineTo(47 + i * 4, -22 + jawOpen);
+    c.lineTo(48 + i * 4, -16 + jawOpen * 0.3);
+    c.closePath(); c.fill();
+  }
+  // Eye
+  c.fillStyle = '#ffcc44';
+  c.beginPath(); c.arc(28, -34, 3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(29, -34, 1.2, 2.4, 0, 0, Math.PI*2); c.fill();
+  // Head ridges
+  c.fillStyle = '#5a1a28';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.arc(44 + i * 10, -36 + Math.sin(i) * 2, 2.2, 0, Math.PI*2); c.fill();
+  }
+  // Nostril at snout tip
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(82, -27, 1.8, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawAllosaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const stride = Math.sin(t * 0.22) * 3;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.28)';
+  c.beginPath(); c.ellipse(0, 52, 68, 6, 0, 0, Math.PI*2); c.fill();
+  // Tail (long, held horizontal for balance)
+  const tailWave = Math.sin(t * 0.18) * 3;
+  c.fillStyle = '#8a6a3a';
+  c.beginPath();
+  c.moveTo(-22, -2);
+  c.quadraticCurveTo(-58, -14 + tailWave, -96, -4 + tailWave);
+  c.lineTo(-104, 0 + tailWave);
+  c.lineTo(-96, 6 + tailWave);
+  c.quadraticCurveTo(-58, 10 + tailWave, -22, 18);
+  c.closePath(); c.fill();
+  // Tail bands
+  c.fillStyle = '#6a4a28';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.ellipse(-34 - i * 12, -4 + i * 1 + tailWave * (1 - i * 0.15), 4, 2.5, -0.2, 0, Math.PI*2);
+    c.fill();
+  }
+  // Back leg (far)
+  c.fillStyle = '#6a5028';
+  c.beginPath();
+  c.moveTo(-12, 4); c.lineTo(-20 + stride, 28); c.lineTo(-10 + stride, 52);
+  c.lineTo(8 + stride, 52); c.lineTo(6, 28); c.lineTo(4, 10);
+  c.closePath(); c.fill();
+  // Front leg (close)
+  c.fillStyle = '#8a6a3a';
+  c.beginPath();
+  c.moveTo(14, 8); c.lineTo(6 - stride, 32); c.lineTo(18 - stride, 52);
+  c.lineTo(34 - stride, 52); c.lineTo(30, 30); c.lineTo(24, 12);
+  c.closePath(); c.fill();
+  // Foot claws (3 toes)
+  c.fillStyle = 'white';
+  [[-8 + stride, 52], [2 + stride, 52], [10 + stride, 52],
+   [18 - stride, 52], [26 - stride, 52], [32 - stride, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 2, fy + 5); c.lineTo(fx + 5, fy);
+    c.closePath(); c.fill();
+  });
+  // Body (muscular, tilted forward)
+  c.fillStyle = '#8a6a3a';
+  c.beginPath(); c.ellipse(2, -6, 40, 24, -0.1, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#c8a06a';
+  c.beginPath(); c.ellipse(4, 14, 30, 7, 0, 0, Math.PI*2); c.fill();
+  // Arms (longer than T. rex, 3-fingered)
+  c.fillStyle = '#6a5028';
+  c.beginPath();
+  c.moveTo(20, 2); c.lineTo(32, 12); c.lineTo(38, 22); c.lineTo(32, 24);
+  c.lineTo(24, 16); c.lineTo(16, 6);
+  c.closePath(); c.fill();
+  // Three large claws
+  c.strokeStyle = 'white'; c.lineWidth = 1.8;
+  c.beginPath(); c.moveTo(36, 22); c.lineTo(42, 20); c.stroke();
+  c.beginPath(); c.moveTo(36, 24); c.lineTo(42, 25); c.stroke();
+  c.beginPath(); c.moveTo(36, 26); c.lineTo(41, 29); c.stroke();
+  // Back spines (small ridge)
+  c.fillStyle = '#5a3a20';
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.moveTo(-24 + i * 9, -28);
+    c.lineTo(-22 + i * 9, -33);
+    c.lineTo(-20 + i * 9, -28);
+    c.closePath(); c.fill();
+  }
+  // Head (long, narrow)
+  c.fillStyle = '#9a7a4a';
+  c.beginPath(); c.ellipse(38, -32, 26, 16, -0.05, 0, Math.PI*2); c.fill();
+  // Snout extends
+  c.beginPath(); c.ellipse(58, -28, 14, 10, 0, 0, Math.PI*2); c.fill();
+  // Jaw (opens with action)
+  const jawOpen = action ? 14 : 2;
+  c.fillStyle = '#7a5a2a';
+  c.beginPath();
+  c.moveTo(22, -24);
+  c.lineTo(72, -22 + jawOpen * 0.25);
+  c.lineTo(72, -16 + jawOpen);
+  c.lineTo(22, -14);
+  c.closePath(); c.fill();
+  // Mouth interior
+  if (action) {
+    c.fillStyle = '#3a0010';
+    c.beginPath();
+    c.moveTo(28, -22); c.lineTo(68, -20 + jawOpen * 0.25);
+    c.lineTo(68, -17 + jawOpen); c.lineTo(28, -16);
+    c.closePath(); c.fill();
+  }
+  // Upper teeth
+  c.fillStyle = 'white';
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.moveTo(27 + i * 5.5, -22);
+    c.lineTo(29 + i * 5.5, -15);
+    c.lineTo(31 + i * 5.5, -22);
+    c.closePath(); c.fill();
+  }
+  // Lower teeth
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.moveTo(30 + i * 6, -14 + jawOpen);
+    c.lineTo(32 + i * 6, -20 + jawOpen);
+    c.lineTo(34 + i * 6, -14 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // Signature brow horns / lacrimal crests (distinctive allosaurus feature)
+  c.fillStyle = '#5a3a20';
+  c.beginPath();
+  c.moveTo(36, -44); c.lineTo(40, -52); c.lineTo(44, -44);
+  c.closePath(); c.fill();
+  c.beginPath();
+  c.moveTo(48, -42); c.lineTo(52, -48); c.lineTo(56, -42);
+  c.closePath(); c.fill();
+  // Nasal ridge
+  c.fillStyle = '#7a5a2a';
+  c.beginPath();
+  c.ellipse(62, -34, 6, 2.5, -0.15, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = '#ff9922';
+  c.beginPath(); c.arc(42, -38, 3.2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(43, -38, 1.1, 2.4, 0, 0, Math.PI*2); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(66, -30, 1.6, 0, Math.PI*2); c.fill();
+  // Skin stripes on body (camouflage)
+  c.fillStyle = 'rgba(60, 40, 20, 0.45)';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.ellipse(-14 + i * 12, -16 + Math.sin(i) * 4, 8, 2, 0.3, 0, Math.PI*2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawMosasaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const undulate = Math.sin(t * 0.15) * 4;
+  // Shadow on seabed (far below)
+  c.fillStyle = 'rgba(0,0,0,0.15)';
+  c.beginPath(); c.ellipse(0, 70, 80, 6, 0, 0, Math.PI*2); c.fill();
+  // Tail (long, serpentine)
+  const tailBase = Math.sin(t * 0.15) * 6;
+  c.fillStyle = '#2a4a3a';
+  c.beginPath();
+  c.moveTo(-30, -6);
+  c.quadraticCurveTo(-60, -18 + tailBase, -95, -4 + tailBase * 1.3);
+  c.lineTo(-110, 0 + tailBase * 1.4);
+  c.lineTo(-95, 6 + tailBase * 1.3);
+  c.quadraticCurveTo(-60, 14 + tailBase, -30, 12);
+  c.closePath(); c.fill();
+  // Shark-like tail fluke (downturned heterocercal)
+  c.fillStyle = '#1a3a2a';
+  c.beginPath();
+  c.moveTo(-100, -4 + tailBase * 1.4);
+  c.lineTo(-122, -18 + tailBase * 1.5);
+  c.lineTo(-116, -4 + tailBase * 1.5);
+  c.lineTo(-128, 8 + tailBase * 1.5);
+  c.lineTo(-100, 4 + tailBase * 1.4);
+  c.closePath(); c.fill();
+  // Tail keel (top ridge)
+  c.fillStyle = '#1a3a2a';
+  for (let i = 0; i < 5; i++) {
+    const px = -40 - i * 12;
+    const py = -10 - i * 1 + tailBase * (0.5 + i * 0.15);
+    c.beginPath();
+    c.moveTo(px, py); c.lineTo(px + 4, py - 4); c.lineTo(px + 8, py);
+    c.closePath(); c.fill();
+  }
+  // Back flippers (rear paddles)
+  const fpSwing = Math.sin(t * 0.18) * 3;
+  c.fillStyle = '#3a5a48';
+  c.beginPath();
+  c.moveTo(-18, 10);
+  c.quadraticCurveTo(-26, 28 + fpSwing, -12, 38 + fpSwing);
+  c.quadraticCurveTo(-4, 32 + fpSwing, -6, 16);
+  c.closePath(); c.fill();
+  // Back flipper (far side, smaller)
+  c.fillStyle = '#2a4a38';
+  c.beginPath();
+  c.moveTo(-14, -4);
+  c.quadraticCurveTo(-22, -20 - fpSwing, -8, -30 - fpSwing);
+  c.quadraticCurveTo(0, -22 - fpSwing, -4, -8);
+  c.closePath(); c.fill();
+  // Body (long serpentine)
+  c.fillStyle = '#3a5a48';
+  c.beginPath(); c.ellipse(0, -2, 46, 20, 0, 0, Math.PI*2); c.fill();
+  // Belly counter-shading
+  c.fillStyle = '#c8d8a8';
+  c.beginPath(); c.ellipse(2, 10, 38, 10, 0, 0, Math.PI*2); c.fill();
+  // Belly line transition
+  c.fillStyle = 'rgba(80, 110, 80, 0.6)';
+  c.beginPath(); c.ellipse(2, 4, 40, 5, 0, 0, Math.PI*2); c.fill();
+  // Front flippers (larger paddles)
+  const frSwing = Math.sin(t * 0.18 + 1) * 4;
+  c.fillStyle = '#2a4a38';
+  // Front flipper close
+  c.beginPath();
+  c.moveTo(12, 12);
+  c.quadraticCurveTo(18, 32 + frSwing, 36, 38 + frSwing);
+  c.quadraticCurveTo(42, 28 + frSwing, 26, 16);
+  c.closePath(); c.fill();
+  // Front flipper far
+  c.fillStyle = '#1a3a2a';
+  c.beginPath();
+  c.moveTo(14, -6);
+  c.quadraticCurveTo(20, -22 - frSwing, 36, -28 - frSwing);
+  c.quadraticCurveTo(42, -18 - frSwing, 28, -10);
+  c.closePath(); c.fill();
+  // Scutes along back
+  c.fillStyle = '#1a3a2a';
+  for (let i = 0; i < 8; i++) {
+    const sx = -30 + i * 8;
+    const sy = -20 + Math.sin(i * 0.5) * 2;
+    c.beginPath();
+    c.arc(sx, sy, 2.5, 0, Math.PI*2); c.fill();
+  }
+  // Dappled pattern on back
+  c.fillStyle = 'rgba(15, 30, 20, 0.5)';
+  for (let i = 0; i < 10; i++) {
+    const dx = -32 + i * 7 + Math.sin(i) * 2;
+    const dy = -14 + Math.cos(i * 1.2) * 6;
+    c.beginPath();
+    c.ellipse(dx, dy, 3.5, 2, 0.2, 0, Math.PI*2);
+    c.fill();
+  }
+  // Head (large, elongated crocodilian)
+  c.fillStyle = '#3a5a48';
+  c.beginPath(); c.ellipse(42, -8, 28, 16, -0.03, 0, Math.PI*2); c.fill();
+  // Long snout
+  c.beginPath(); c.ellipse(68, -5, 18, 10, 0.02, 0, Math.PI*2); c.fill();
+  // Jaw (opens wide with action)
+  const jawOpen = action ? 16 : 2;
+  c.fillStyle = '#2a4a38';
+  c.beginPath();
+  c.moveTo(22, -4);
+  c.lineTo(86, -2 + jawOpen * 0.2);
+  c.lineTo(86, 4 + jawOpen);
+  c.lineTo(22, 6);
+  c.closePath(); c.fill();
+  // Mouth interior
+  if (action) {
+    c.fillStyle = '#4a0818';
+    c.beginPath();
+    c.moveTo(30, -2); c.lineTo(82, 0 + jawOpen * 0.2);
+    c.lineTo(82, 3 + jawOpen); c.lineTo(30, 4);
+    c.closePath(); c.fill();
+  }
+  // Upper teeth (many, conical, recurved)
+  c.fillStyle = 'white';
+  for (let i = 0; i < 12; i++) {
+    c.beginPath();
+    c.moveTo(28 + i * 5, -4);
+    c.lineTo(29 + i * 5, 4);
+    c.lineTo(31 + i * 5, -4);
+    c.closePath(); c.fill();
+  }
+  // Lower teeth
+  for (let i = 0; i < 11; i++) {
+    c.beginPath();
+    c.moveTo(30 + i * 5, 6 + jawOpen * 0.2);
+    c.lineTo(31 + i * 5, -2 + jawOpen);
+    c.lineTo(33 + i * 5, 6 + jawOpen * 0.2);
+    c.closePath(); c.fill();
+  }
+  // Signature pterygoid (second row) teeth inside mouth
+  if (action) {
+    c.fillStyle = '#f0f0f0';
+    for (let i = 0; i < 5; i++) {
+      c.beginPath();
+      c.moveTo(40 + i * 8, -2);
+      c.lineTo(41 + i * 8, 2);
+      c.lineTo(42 + i * 8, -2);
+      c.closePath(); c.fill();
+    }
+  }
+  // Eye (small, high on skull)
+  c.fillStyle = '#e8a22a';
+  c.beginPath(); c.arc(44, -16, 2.8, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(45, -16, 1, 2.2, 0, 0, Math.PI*2); c.fill();
+  // Brow ridge
+  c.fillStyle = '#1a3a2a';
+  c.beginPath();
+  c.moveTo(38, -22); c.lineTo(52, -19); c.lineTo(48, -14); c.lineTo(38, -17);
+  c.closePath(); c.fill();
+  // Nostril near snout tip
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(80, -8, 1.6, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawElasmosaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.15)';
+  c.beginPath(); c.ellipse(0, 70, 60, 5, 0, 0, Math.PI*2); c.fill();
+  // Tail (short, tapered)
+  const tailSway = Math.sin(t * 0.14) * 3;
+  c.fillStyle = '#4a6a78';
+  c.beginPath();
+  c.moveTo(-22, -4);
+  c.quadraticCurveTo(-40, -6 + tailSway, -54, 0 + tailSway);
+  c.lineTo(-60, 2 + tailSway);
+  c.lineTo(-54, 6 + tailSway);
+  c.quadraticCurveTo(-40, 10 + tailSway, -22, 10);
+  c.closePath(); c.fill();
+  // Small tail fin tip
+  c.fillStyle = '#3a5868';
+  c.beginPath();
+  c.moveTo(-54, 0 + tailSway);
+  c.lineTo(-66, -4 + tailSway);
+  c.lineTo(-62, 4 + tailSway);
+  c.lineTo(-66, 10 + tailSway);
+  c.lineTo(-54, 6 + tailSway);
+  c.closePath(); c.fill();
+  // Rear flippers (large paddles, rowing motion)
+  const rearRow = Math.sin(t * 0.12) * 4;
+  // Far rear flipper
+  c.fillStyle = '#3a5868';
+  c.beginPath();
+  c.moveTo(-14, -6);
+  c.quadraticCurveTo(-22, -24 - rearRow, -4, -34 - rearRow);
+  c.quadraticCurveTo(4, -26 - rearRow, -2, -10);
+  c.closePath(); c.fill();
+  // Near rear flipper
+  c.fillStyle = '#5a7888';
+  c.beginPath();
+  c.moveTo(-10, 8);
+  c.quadraticCurveTo(-18, 26 + rearRow, 0, 36 + rearRow);
+  c.quadraticCurveTo(10, 30 + rearRow, 4, 14);
+  c.closePath(); c.fill();
+  // Body (broad, short, turtle-like)
+  c.fillStyle = '#5a7888';
+  c.beginPath(); c.ellipse(-2, 0, 30, 18, -0.05, 0, Math.PI*2); c.fill();
+  // Belly (counter-shading)
+  c.fillStyle = '#c8d8e0';
+  c.beginPath(); c.ellipse(0, 10, 24, 7, 0, 0, Math.PI*2); c.fill();
+  // Back dappled pattern
+  c.fillStyle = 'rgba(30, 50, 65, 0.55)';
+  for (let i = 0; i < 7; i++) {
+    const dx = -20 + i * 6;
+    const dy = -10 + Math.sin(i * 1.3) * 4;
+    c.beginPath();
+    c.ellipse(dx, dy, 3, 1.6, 0.2, 0, Math.PI*2);
+    c.fill();
+  }
+  // Front flippers (even larger, main propulsion)
+  const frontRow = Math.sin(t * 0.12 + Math.PI) * 4;
+  // Far front flipper
+  c.fillStyle = '#3a5868';
+  c.beginPath();
+  c.moveTo(8, -8);
+  c.quadraticCurveTo(14, -28 - frontRow, 32, -36 - frontRow);
+  c.quadraticCurveTo(40, -26 - frontRow, 26, -10);
+  c.closePath(); c.fill();
+  // Near front flipper
+  c.fillStyle = '#5a7888';
+  c.beginPath();
+  c.moveTo(14, 8);
+  c.quadraticCurveTo(22, 28 + frontRow, 42, 38 + frontRow);
+  c.quadraticCurveTo(50, 30 + frontRow, 32, 14);
+  c.closePath(); c.fill();
+  // Flipper highlights (veins)
+  c.strokeStyle = 'rgba(180, 200, 210, 0.4)'; c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(16, 10); c.quadraticCurveTo(28, 22 + frontRow, 40, 34 + frontRow);
+  c.stroke();
+  c.beginPath();
+  c.moveTo(-8, 10); c.quadraticCurveTo(-4, 20 + rearRow, 0, 32 + rearRow);
+  c.stroke();
+  // Neck base
+  c.fillStyle = '#5a7888';
+  c.beginPath(); c.ellipse(18, -8, 10, 8, 0.1, 0, Math.PI*2); c.fill();
+  // NECK (extremely long, the signature feature)
+  // Draw as a curved sequence of segments
+  const neckSeg = 18;
+  const neckSway = Math.sin(t * 0.08) * 0.15;
+  const actionLift = action ? -10 * action : 0;
+  c.fillStyle = '#5a7888';
+  c.beginPath();
+  // Build neck curve (upper edge)
+  const pts = [];
+  for (let i = 0; i <= neckSeg; i++) {
+    const p = i / neckSeg;
+    const cx = 22 + p * 72;
+    const cy = -10 - p * 48 + Math.sin(t * 0.04 + p * 3) * 3 + actionLift * p;
+    const thickness = 9 - p * 5;
+    pts.push({ x: cx, y: cy, th: thickness });
+  }
+  // Upper edge
+  c.moveTo(pts[0].x, pts[0].y - pts[0].th + neckSway * 5);
+  for (let i = 1; i < pts.length; i++) {
+    c.lineTo(pts[i].x, pts[i].y - pts[i].th);
+  }
+  // Lower edge (reverse)
+  for (let i = pts.length - 1; i >= 0; i--) {
+    c.lineTo(pts[i].x, pts[i].y + pts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Neck underside (lighter)
+  c.fillStyle = '#a8c0c8';
+  c.beginPath();
+  c.moveTo(pts[0].x, pts[0].y + pts[0].th * 0.4);
+  for (let i = 1; i < pts.length; i++) {
+    c.lineTo(pts[i].x, pts[i].y + pts[i].th * 0.4);
+  }
+  for (let i = pts.length - 1; i >= 0; i--) {
+    c.lineTo(pts[i].x, pts[i].y + pts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Neck ring markings
+  c.strokeStyle = 'rgba(30, 50, 65, 0.4)'; c.lineWidth = 1;
+  for (let i = 2; i < pts.length - 1; i += 2) {
+    c.beginPath();
+    c.moveTo(pts[i].x - 1, pts[i].y - pts[i].th);
+    c.lineTo(pts[i].x + 1, pts[i].y + pts[i].th);
+    c.stroke();
+  }
+  // Head (small, at end of neck)
+  const headP = pts[pts.length - 1];
+  const hx = headP.x + 8;
+  const hy = headP.y - 4;
+  c.fillStyle = '#5a7888';
+  c.beginPath(); c.ellipse(hx, hy, 10, 6, 0.1, 0, Math.PI*2); c.fill();
+  // Snout
+  c.beginPath(); c.ellipse(hx + 7, hy + 1, 5, 3, 0.15, 0, Math.PI*2); c.fill();
+  // Jaw (opens with action)
+  const jawOpen = action ? 5 : 1;
+  c.fillStyle = '#3a5868';
+  c.beginPath();
+  c.moveTo(hx - 4, hy + 1);
+  c.lineTo(hx + 12, hy + 2);
+  c.lineTo(hx + 12, hy + 2 + jawOpen);
+  c.lineTo(hx - 4, hy + 3);
+  c.closePath(); c.fill();
+  // Teeth (small interlocking)
+  c.fillStyle = 'white';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.moveTo(hx - 2 + i * 3, hy + 1);
+    c.lineTo(hx - 1 + i * 3, hy + 3);
+    c.lineTo(hx + i * 3, hy + 1);
+    c.closePath(); c.fill();
+  }
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.moveTo(hx - 1 + i * 3, hy + 3 + jawOpen);
+    c.lineTo(hx + i * 3, hy + 1 + jawOpen);
+    c.lineTo(hx + 1 + i * 3, hy + 3 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(hx - 1, hy - 1, 1.6, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(hx - 0.5, hy - 1, 0.9, 0, Math.PI*2); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(hx + 9, hy, 0.7, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawDiplodocus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const stride = Math.sin(t * 0.08) * 2;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath(); c.ellipse(0, 52, 90, 7, 0, 0, Math.PI*2); c.fill();
+  // Tail (extremely long, whip-like, held horizontal)
+  // Action triggers a dramatic whip motion
+  const whipSwing = action ? Math.sin(t * 0.8) * 18 : Math.sin(t * 0.06) * 3;
+  c.fillStyle = '#7a6448';
+  // Build tail as a curved tapered shape
+  const tailPts = [];
+  for (let i = 0; i <= 14; i++) {
+    const p = i / 14;
+    const tx = -22 - p * 110;
+    const ty = -4 + Math.sin(t * 0.06 + p * 4) * 2 + whipSwing * (p * p);
+    const th = 9 - p * 7.5;
+    tailPts.push({ x: tx, y: ty, th });
+  }
+  c.beginPath();
+  c.moveTo(tailPts[0].x, tailPts[0].y - tailPts[0].th);
+  for (let i = 1; i < tailPts.length; i++) {
+    c.lineTo(tailPts[i].x, tailPts[i].y - tailPts[i].th);
+  }
+  for (let i = tailPts.length - 1; i >= 0; i--) {
+    c.lineTo(tailPts[i].x, tailPts[i].y + tailPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Tail underside lighter
+  c.fillStyle = '#a89878';
+  c.beginPath();
+  c.moveTo(tailPts[0].x, tailPts[0].y);
+  for (let i = 1; i < tailPts.length; i++) {
+    c.lineTo(tailPts[i].x, tailPts[i].y + tailPts[i].th * 0.5);
+  }
+  for (let i = tailPts.length - 1; i >= 0; i--) {
+    c.lineTo(tailPts[i].x, tailPts[i].y + tailPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Whip crack effect when action
+  if (action) {
+    const tipP = tailPts[tailPts.length - 1];
+    c.strokeStyle = 'rgba(255, 255, 255, 0.7)'; c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(tipP.x - 8, tipP.y - 10);
+    c.lineTo(tipP.x - 4, tipP.y + 10);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(tipP.x + 6, tipP.y - 8);
+    c.lineTo(tipP.x - 2, tipP.y + 8);
+    c.stroke();
+  }
+  // Far side (back) legs
+  c.fillStyle = '#5a4830';
+  // Far back leg
+  c.beginPath();
+  c.moveTo(-26, 4); c.lineTo(-32, 30 + stride); c.lineTo(-22, 52);
+  c.lineTo(-12, 52); c.lineTo(-14, 30); c.lineTo(-18, 12);
+  c.closePath(); c.fill();
+  // Far front leg
+  c.beginPath();
+  c.moveTo(28, 4); c.lineTo(22, 30 - stride); c.lineTo(32, 52);
+  c.lineTo(42, 52); c.lineTo(40, 30); c.lineTo(36, 12);
+  c.closePath(); c.fill();
+  // Body (massive elongated barrel)
+  c.fillStyle = '#7a6448';
+  c.beginPath(); c.ellipse(0, -4, 50, 24, 0, 0, Math.PI*2); c.fill();
+  // Body shading underside
+  c.fillStyle = '#a89878';
+  c.beginPath(); c.ellipse(2, 12, 42, 8, 0, 0, Math.PI*2); c.fill();
+  // Hip hump
+  c.fillStyle = '#6a5438';
+  c.beginPath(); c.ellipse(-22, -16, 18, 12, -0.1, 0, Math.PI*2); c.fill();
+  // Shoulder hump
+  c.beginPath(); c.ellipse(22, -14, 16, 10, 0.1, 0, Math.PI*2); c.fill();
+  // Near side (front) legs
+  c.fillStyle = '#7a6448';
+  // Near back leg (taller, stockier)
+  c.beginPath();
+  c.moveTo(-20, 6); c.lineTo(-26, 32 - stride); c.lineTo(-16, 52);
+  c.lineTo(-2, 52); c.lineTo(-6, 30); c.lineTo(-12, 14);
+  c.closePath(); c.fill();
+  // Near front leg
+  c.beginPath();
+  c.moveTo(22, 6); c.lineTo(16, 32 + stride); c.lineTo(26, 52);
+  c.lineTo(40, 52); c.lineTo(38, 30); c.lineTo(32, 14);
+  c.closePath(); c.fill();
+  // Toe nails
+  c.fillStyle = '#3a2a18';
+  [[-22, 52], [-9, 52], [27, 52], [38, 52]].forEach(([fx, fy]) => {
+    c.beginPath(); c.arc(fx, fy + 1, 2.2, 0, Math.PI); c.fill();
+  });
+  // Spine ridge of small triangular spines (recent fossil findings)
+  c.fillStyle = '#3a2818';
+  for (let i = 0; i < 14; i++) {
+    const sx = -34 + i * 5;
+    const sy = -28 + Math.sin(i * 0.3) * 1;
+    c.beginPath();
+    c.moveTo(sx, sy); c.lineTo(sx + 2, sy - 4); c.lineTo(sx + 4, sy);
+    c.closePath(); c.fill();
+  }
+  // NECK (very long, held more horizontal than brachiosaur)
+  // Action lifts neck to browse
+  const neckLift = action ? -8 : 0;
+  const neckPts = [];
+  const neckSegs = 16;
+  for (let i = 0; i <= neckSegs; i++) {
+    const p = i / neckSegs;
+    const cx = 30 + p * 80;
+    // Gently curving upward then forward
+    const cy = -12 - Math.sin(p * Math.PI * 0.6) * 30 + neckLift * p + Math.sin(t * 0.04 + p * 2) * 1.5;
+    const thickness = 12 - p * 8;
+    neckPts.push({ x: cx, y: cy, th: thickness });
+  }
+  // Neck body
+  c.fillStyle = '#7a6448';
+  c.beginPath();
+  c.moveTo(neckPts[0].x, neckPts[0].y - neckPts[0].th);
+  for (let i = 1; i < neckPts.length; i++) {
+    c.lineTo(neckPts[i].x, neckPts[i].y - neckPts[i].th);
+  }
+  for (let i = neckPts.length - 1; i >= 0; i--) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Neck underside lighter
+  c.fillStyle = '#a89878';
+  c.beginPath();
+  c.moveTo(neckPts[0].x, neckPts[0].y);
+  for (let i = 1; i < neckPts.length; i++) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th * 0.4);
+  }
+  for (let i = neckPts.length - 1; i >= 0; i--) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Neck spines (small)
+  c.fillStyle = '#3a2818';
+  for (let i = 1; i < neckPts.length; i += 1) {
+    const np = neckPts[i];
+    c.beginPath();
+    c.moveTo(np.x - 1, np.y - np.th);
+    c.lineTo(np.x, np.y - np.th - 3);
+    c.lineTo(np.x + 1, np.y - np.th);
+    c.closePath(); c.fill();
+  }
+  // Head (small, elongated, peg-toothed)
+  const headP = neckPts[neckPts.length - 1];
+  const hx = headP.x + 12;
+  const hy = headP.y - 2;
+  c.fillStyle = '#7a6448';
+  c.beginPath(); c.ellipse(hx, hy, 14, 7, 0.05, 0, Math.PI*2); c.fill();
+  // Snout (rounded, blunt)
+  c.beginPath(); c.ellipse(hx + 10, hy + 1, 7, 5, 0.05, 0, Math.PI*2); c.fill();
+  // Mouth line (subtle, action opens it)
+  const mouthOpen = action ? 4 : 0;
+  c.fillStyle = '#3a2818';
+  c.beginPath();
+  c.moveTo(hx + 4, hy + 2);
+  c.lineTo(hx + 16, hy + 2);
+  c.lineTo(hx + 16, hy + 4 + mouthOpen);
+  c.lineTo(hx + 4, hy + 3);
+  c.closePath(); c.fill();
+  // Peg teeth (front-only, small)
+  if (action) {
+    c.fillStyle = '#f0e8c0';
+    for (let i = 0; i < 5; i++) {
+      c.fillRect(hx + 10 + i * 1.2, hy + 2, 0.8, 2);
+    }
+  }
+  // Eye (small, set forward)
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(hx + 2, hy - 2, 1.6, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(hx + 2.2, hy - 2, 0.9, 0, Math.PI*2); c.fill();
+  // Nostril (high, near forehead - sauropods had nasal openings high on skull)
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(hx - 4, hy - 4, 1, 0, Math.PI*2); c.fill();
+  // Skin texture dots
+  c.fillStyle = 'rgba(50, 38, 22, 0.45)';
+  for (let i = 0; i < 12; i++) {
+    const dx = -36 + i * 7;
+    const dy = -8 + Math.sin(i * 1.2) * 8;
+    c.beginPath();
+    c.arc(dx, dy, 1.4, 0, Math.PI*2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawCoelophysis(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Fast running motion
+  const sprint = Math.sin(t * 0.4) * 4;
+  const sprint2 = Math.sin(t * 0.4 + Math.PI) * 4;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath(); c.ellipse(0, 52, 50, 5, 0, 0, Math.PI*2); c.fill();
+  // Long whip tail (held high for balance)
+  const tailWave = Math.sin(t * 0.25) * 5;
+  c.fillStyle = '#a86848';
+  c.beginPath();
+  c.moveTo(-12, -8);
+  c.quadraticCurveTo(-32, -22 + tailWave, -52, -10 + tailWave * 1.5);
+  c.lineTo(-72, 0 + tailWave * 1.8);
+  c.lineTo(-72, 4 + tailWave * 1.8);
+  c.lineTo(-52, -4 + tailWave * 1.5);
+  c.quadraticCurveTo(-32, -16 + tailWave, -12, 0);
+  c.closePath(); c.fill();
+  // Tail stripes
+  c.fillStyle = '#7a4828';
+  for (let i = 0; i < 5; i++) {
+    const px = -16 - i * 11;
+    const py = -10 - i * 1 + tailWave * (0.5 + i * 0.2);
+    c.beginPath();
+    c.ellipse(px, py, 2.5, 1.5, -0.15, 0, Math.PI*2); c.fill();
+  }
+  // Far back leg (thin, long, runner)
+  c.fillStyle = '#8a4a30';
+  c.beginPath();
+  c.moveTo(-6, 4); c.lineTo(-12 + sprint, 26); c.lineTo(-4 + sprint, 44);
+  c.lineTo(2 + sprint, 52); c.lineTo(6 + sprint, 44); c.lineTo(2, 28); c.lineTo(0, 12);
+  c.closePath(); c.fill();
+  // Far foot claws
+  c.fillStyle = '#3a1a08';
+  c.beginPath();
+  c.moveTo(-2 + sprint, 52); c.lineTo(0 + sprint, 56); c.lineTo(3 + sprint, 52);
+  c.closePath(); c.fill();
+  // Body (slender, gracile)
+  c.fillStyle = '#a86848';
+  c.beginPath(); c.ellipse(0, -4, 26, 12, -0.1, 0, Math.PI*2); c.fill();
+  // Belly counter-shading
+  c.fillStyle = '#e8b890';
+  c.beginPath(); c.ellipse(2, 6, 20, 4, 0, 0, Math.PI*2); c.fill();
+  // Side stripe (theropod countershading)
+  c.fillStyle = '#7a4828';
+  c.beginPath(); c.ellipse(0, -2, 22, 2.5, -0.1, 0, Math.PI*2); c.fill();
+  // Near back leg (thin, long, runner) - alternating with far leg
+  c.fillStyle = '#a86848';
+  c.beginPath();
+  c.moveTo(0, 6); c.lineTo(-6 + sprint2, 28); c.lineTo(2 + sprint2, 46);
+  c.lineTo(8 + sprint2, 52); c.lineTo(12 + sprint2, 46); c.lineTo(8, 30); c.lineTo(6, 14);
+  c.closePath(); c.fill();
+  // Near foot claws
+  c.fillStyle = 'white';
+  c.beginPath();
+  c.moveTo(4 + sprint2, 52); c.lineTo(6 + sprint2, 56); c.lineTo(9 + sprint2, 52);
+  c.closePath(); c.fill();
+  c.beginPath();
+  c.moveTo(7 + sprint2, 52); c.lineTo(9 + sprint2, 55); c.lineTo(11 + sprint2, 52);
+  c.closePath(); c.fill();
+  // Arms (slender, three-fingered, held forward)
+  const armReach = action ? 8 : 0;
+  c.fillStyle = '#8a4a30';
+  c.beginPath();
+  c.moveTo(8, 0); c.lineTo(18 + armReach, 8); c.lineTo(22 + armReach, 16);
+  c.lineTo(18 + armReach, 18); c.lineTo(14 + armReach, 12); c.lineTo(6, 4);
+  c.closePath(); c.fill();
+  // Three claws on hand
+  c.strokeStyle = 'white'; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(20 + armReach, 16); c.lineTo(26 + armReach, 14); c.stroke();
+  c.beginPath(); c.moveTo(20 + armReach, 17); c.lineTo(26 + armReach, 18); c.stroke();
+  c.beginPath(); c.moveTo(20 + armReach, 19); c.lineTo(25 + armReach, 22); c.stroke();
+  // NECK (long, S-curved, held high)
+  const neckPts = [];
+  const neckSegs = 10;
+  const neckLift = action ? -4 : 0;
+  for (let i = 0; i <= neckSegs; i++) {
+    const p = i / neckSegs;
+    const cx = 14 + p * 22;
+    const cy = -10 - Math.sin(p * Math.PI) * 14 - p * 8 + neckLift * p + Math.sin(t * 0.06 + p * 2) * 1;
+    const thickness = 6 - p * 3;
+    neckPts.push({ x: cx, y: cy, th: thickness });
+  }
+  c.fillStyle = '#a86848';
+  c.beginPath();
+  c.moveTo(neckPts[0].x, neckPts[0].y - neckPts[0].th);
+  for (let i = 1; i < neckPts.length; i++) {
+    c.lineTo(neckPts[i].x, neckPts[i].y - neckPts[i].th);
+  }
+  for (let i = neckPts.length - 1; i >= 0; i--) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Neck underside lighter
+  c.fillStyle = '#e8b890';
+  c.beginPath();
+  c.moveTo(neckPts[0].x, neckPts[0].y);
+  for (let i = 1; i < neckPts.length; i++) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th * 0.4);
+  }
+  for (let i = neckPts.length - 1; i >= 0; i--) {
+    c.lineTo(neckPts[i].x, neckPts[i].y + neckPts[i].th);
+  }
+  c.closePath(); c.fill();
+  // Head (small, narrow, elongated)
+  const headP = neckPts[neckPts.length - 1];
+  const hx = headP.x + 6;
+  const hy = headP.y;
+  c.fillStyle = '#a86848';
+  c.beginPath(); c.ellipse(hx, hy, 14, 6, -0.05, 0, Math.PI*2); c.fill();
+  // Snout (long and narrow)
+  c.beginPath(); c.ellipse(hx + 10, hy + 1, 8, 4, 0.05, 0, Math.PI*2); c.fill();
+  // Jaw (opens with action - many small teeth)
+  const jawOpen = action ? 5 : 1;
+  c.fillStyle = '#7a4828';
+  c.beginPath();
+  c.moveTo(hx - 4, hy + 1);
+  c.lineTo(hx + 18, hy + 2);
+  c.lineTo(hx + 18, hy + 3 + jawOpen);
+  c.lineTo(hx - 4, hy + 3);
+  c.closePath(); c.fill();
+  // Many small needle-like teeth (Coelophysis had ~26 teeth)
+  c.fillStyle = 'white';
+  for (let i = 0; i < 9; i++) {
+    c.beginPath();
+    c.moveTo(hx - 2 + i * 2.4, hy + 1);
+    c.lineTo(hx - 1.5 + i * 2.4, hy + 3);
+    c.lineTo(hx - 1 + i * 2.4, hy + 1);
+    c.closePath(); c.fill();
+  }
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.moveTo(hx - 1 + i * 2.5, hy + 3 + jawOpen);
+    c.lineTo(hx - 0.5 + i * 2.5, hy + 1 + jawOpen);
+    c.lineTo(hx + i * 2.5, hy + 3 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // Distinctive subnarial notch (gap between premaxilla and maxilla teeth - signature feature)
+  c.fillStyle = '#7a4828';
+  c.fillRect(hx + 2, hy + 1, 1.5, 2.5);
+  // Eye (large, set forward)
+  c.fillStyle = '#f0d040';
+  c.beginPath(); c.arc(hx - 2, hy - 1, 2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(hx - 1.5, hy - 1, 0.7, 1.6, 0, 0, Math.PI*2); c.fill();
+  // Brow ridge
+  c.fillStyle = '#7a4828';
+  c.beginPath();
+  c.moveTo(hx - 5, hy - 4); c.lineTo(hx + 1, hy - 3); c.lineTo(hx - 1, hy - 1);
+  c.closePath(); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(hx + 14, hy, 0.8, 0, Math.PI*2); c.fill();
+  // Body stripes (theropod camouflage)
+  c.fillStyle = 'rgba(60, 30, 15, 0.55)';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.ellipse(-12 + i * 6, -6 + Math.sin(i) * 3, 4, 1.5, 0.4, 0, Math.PI*2);
+    c.fill();
+  }
+  // Speed lines when running fast
+  if (Math.abs(sprint) > 2) {
+    c.strokeStyle = 'rgba(255, 255, 255, 0.15)'; c.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo(-30 - i * 4, 20 + i * 6);
+      c.lineTo(-50 - i * 4, 20 + i * 6);
+      c.stroke();
+    }
+  }
+  c.restore();
+}
+
+function drawCeratosaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  const stride = Math.sin(t * 0.18) * 3;
+  // Headbutt lunge: when action, the whole upper body pitches forward
+  const lunge = action || 0;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.3)';
+  c.beginPath(); c.ellipse(0, 52, 70, 6, 0, 0, Math.PI*2); c.fill();
+  // Tail (held high, thicker than allosaurus)
+  const tailWave = Math.sin(t * 0.14) * 3;
+  c.fillStyle = '#5a4838';
+  c.beginPath();
+  c.moveTo(-22, -2);
+  c.quadraticCurveTo(-50, -16 + tailWave, -86, -8 + tailWave);
+  c.lineTo(-96, -2 + tailWave);
+  c.lineTo(-86, 6 + tailWave);
+  c.quadraticCurveTo(-50, 12 + tailWave, -22, 18);
+  c.closePath(); c.fill();
+  // Far back leg
+  c.fillStyle = '#3a2818';
+  c.beginPath();
+  c.moveTo(-12, 4); c.lineTo(-18 + stride, 28); c.lineTo(-8 + stride, 52);
+  c.lineTo(8 + stride, 52); c.lineTo(6, 28); c.lineTo(2, 10);
+  c.closePath(); c.fill();
+  // Body (stockier than allosaurus, slightly shorter)
+  c.fillStyle = '#5a4838';
+  c.beginPath(); c.ellipse(2, -4, 38, 22, -0.08, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#a89070';
+  c.beginPath(); c.ellipse(4, 14, 28, 7, 0, 0, Math.PI*2); c.fill();
+  // OSTEODERM ROW (distinctive scutes down the back - signature ceratosaur feature)
+  c.fillStyle = '#3a2410';
+  for (let i = 0; i < 10; i++) {
+    const sx = -22 + i * 6;
+    const sy = -25 + Math.sin(i * 0.3) * 1;
+    // Diamond-shaped scutes
+    c.beginPath();
+    c.moveTo(sx, sy - 5);
+    c.lineTo(sx + 3, sy);
+    c.lineTo(sx, sy + 2);
+    c.lineTo(sx - 3, sy);
+    c.closePath(); c.fill();
+    // Highlight on each scute
+    c.fillStyle = '#7a5028';
+    c.beginPath();
+    c.moveTo(sx - 2, sy - 1);
+    c.lineTo(sx, sy - 4);
+    c.lineTo(sx + 1, sy - 2);
+    c.closePath(); c.fill();
+    c.fillStyle = '#3a2410';
+  }
+  // Near back leg
+  c.fillStyle = '#5a4838';
+  c.beginPath();
+  c.moveTo(-6, 6); c.lineTo(-10 - stride, 30); c.lineTo(0 - stride, 52);
+  c.lineTo(16 - stride, 52); c.lineTo(14, 30); c.lineTo(8, 12);
+  c.closePath(); c.fill();
+  // Foot claws (4-toed - actually ceratosaurids retained 4 toes)
+  c.fillStyle = 'white';
+  [[-2 - stride, 52], [4 - stride, 52], [10 - stride, 52], [14 - stride, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 2, fy + 4); c.lineTo(fx + 4, fy);
+    c.closePath(); c.fill();
+  });
+  // Arms (small, four-fingered - ceratosaur retained 4th digit)
+  c.fillStyle = '#3a2818';
+  c.beginPath();
+  c.moveTo(20, 6); c.lineTo(28, 14); c.lineTo(30, 22);
+  c.lineTo(26, 24); c.lineTo(22, 16); c.lineTo(16, 8);
+  c.closePath(); c.fill();
+  // Four claws
+  c.strokeStyle = 'white'; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(28, 22); c.lineTo(32, 19); c.stroke();
+  c.beginPath(); c.moveTo(28, 23); c.lineTo(33, 23); c.stroke();
+  c.beginPath(); c.moveTo(28, 25); c.lineTo(33, 26); c.stroke();
+  c.beginPath(); c.moveTo(27, 27); c.lineTo(31, 30); c.stroke();
+  // HEAD (the showpiece - lunges forward on action)
+  c.save();
+  c.translate(lunge * 14, lunge * 4);
+  // Head body
+  c.fillStyle = '#6a5440';
+  c.beginPath(); c.ellipse(36, -28, 22, 14, -0.08, 0, Math.PI*2); c.fill();
+  // Snout
+  c.beginPath(); c.ellipse(54, -23, 14, 9, 0, 0, Math.PI*2); c.fill();
+  // Jaw (opens with action)
+  const jawOpen = lunge * 10 + 2;
+  c.fillStyle = '#4a3828';
+  c.beginPath();
+  c.moveTo(20, -22);
+  c.lineTo(66, -19 + jawOpen * 0.2);
+  c.lineTo(66, -14 + jawOpen);
+  c.lineTo(20, -12);
+  c.closePath(); c.fill();
+  // Mouth interior
+  if (action) {
+    c.fillStyle = '#3a0010';
+    c.beginPath();
+    c.moveTo(26, -20); c.lineTo(62, -18 + jawOpen * 0.2);
+    c.lineTo(62, -15 + jawOpen); c.lineTo(26, -14);
+    c.closePath(); c.fill();
+  }
+  // Long teeth (Ceratosaurus had unusually long, blade-like teeth)
+  c.fillStyle = 'white';
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.moveTo(24 + i * 5, -22);
+    c.lineTo(26 + i * 5, -10);  // longer teeth than other theropods
+    c.lineTo(28 + i * 5, -22);
+    c.closePath(); c.fill();
+  }
+  // Lower teeth
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.moveTo(26 + i * 5.5, -12 + jawOpen);
+    c.lineTo(28 + i * 5.5, -22 + jawOpen);
+    c.lineTo(30 + i * 5.5, -12 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // SIGNATURE NASAL HORN (the "ceras" - large blade-like horn on snout)
+  c.fillStyle = '#8a6a40';
+  c.beginPath();
+  c.moveTo(46, -32);
+  c.quadraticCurveTo(50, -50, 56, -52);
+  c.quadraticCurveTo(58, -42, 56, -32);
+  c.closePath(); c.fill();
+  // Horn shading
+  c.fillStyle = '#5a3a18';
+  c.beginPath();
+  c.moveTo(48, -32);
+  c.quadraticCurveTo(50, -46, 53, -50);
+  c.quadraticCurveTo(54, -42, 53, -32);
+  c.closePath(); c.fill();
+  // Horn ridges
+  c.strokeStyle = '#3a2008'; c.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.moveTo(48 + i * 1.5, -36 - i * 4);
+    c.lineTo(54 - i * 0.5, -38 - i * 4);
+    c.stroke();
+  }
+  // Brow horns (smaller pair above eyes)
+  c.fillStyle = '#8a6a40';
+  c.beginPath();
+  c.moveTo(28, -38);
+  c.lineTo(30, -48);
+  c.lineTo(34, -38);
+  c.closePath(); c.fill();
+  c.fillStyle = '#5a3a18';
+  c.beginPath();
+  c.moveTo(29, -38); c.lineTo(30.5, -46); c.lineTo(32, -38);
+  c.closePath(); c.fill();
+  // Second brow horn
+  c.fillStyle = '#8a6a40';
+  c.beginPath();
+  c.moveTo(38, -40);
+  c.lineTo(40, -49);
+  c.lineTo(44, -40);
+  c.closePath(); c.fill();
+  c.fillStyle = '#5a3a18';
+  c.beginPath();
+  c.moveTo(39, -40); c.lineTo(40.5, -47); c.lineTo(42, -40);
+  c.closePath(); c.fill();
+  // Eye (set forward, fierce)
+  c.fillStyle = '#cc4422';
+  c.beginPath(); c.arc(34, -32, 3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(35, -32, 1.1, 2.3, 0, 0, Math.PI*2); c.fill();
+  // Nostril (in front of horn)
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(60, -26, 1.4, 0, Math.PI*2); c.fill();
+  // Headbutt impact lines
+  if (lunge > 0.4) {
+    c.strokeStyle = 'rgba(255, 220, 180, 0.8)'; c.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const a = -0.4 + i * 0.4;
+      c.beginPath();
+      c.moveTo(60 + Math.cos(a) * 8, -50 + Math.sin(a) * 4);
+      c.lineTo(60 + Math.cos(a) * 16, -50 + Math.sin(a) * 8);
+      c.stroke();
+    }
+  }
+  c.restore();
+  // Skin texture
+  c.fillStyle = 'rgba(40, 28, 16, 0.5)';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.ellipse(-12 + i * 10, -10 + Math.sin(i) * 4, 7, 2, 0.3, 0, Math.PI*2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawCarnotaurus(c, x, y, s, dir, action, t) {
+  c.save(); c.translate(x, y); c.scale(dir * s, s);
+  // Fast sprinting motion (Carnotaurus was built for speed)
+  const sprint = Math.sin(t * 0.3) * 4;
+  // Head shake on action (lateral whip)
+  const shake = action ? Math.sin(t * 1.2) * 8 : 0;
+  // Shadow
+  c.fillStyle = 'rgba(0,0,0,0.32)';
+  c.beginPath(); c.ellipse(0, 52, 75, 7, 0, 0, Math.PI*2); c.fill();
+  // Tail (long, muscular, held high for balance)
+  const tailWave = Math.sin(t * 0.2) * 4;
+  c.fillStyle = '#7a3a28';
+  c.beginPath();
+  c.moveTo(-22, -2);
+  c.quadraticCurveTo(-50, -18 + tailWave, -88, -10 + tailWave);
+  c.lineTo(-100, -4 + tailWave);
+  c.lineTo(-88, 6 + tailWave);
+  c.quadraticCurveTo(-50, 14 + tailWave, -22, 18);
+  c.closePath(); c.fill();
+  // Tail muscles (caudofemoralis - massive in carnotaurus)
+  c.fillStyle = '#5a2818';
+  c.beginPath(); c.ellipse(-30, 2 + tailWave * 0.4, 16, 8, -0.1, 0, Math.PI*2); c.fill();
+  // Far back leg
+  c.fillStyle = '#5a2818';
+  c.beginPath();
+  c.moveTo(-10, 4); c.lineTo(-16 + sprint, 26); c.lineTo(-6 + sprint, 46);
+  c.lineTo(0 + sprint, 52); c.lineTo(6 + sprint, 46); c.lineTo(2, 28); c.lineTo(0, 10);
+  c.closePath(); c.fill();
+  // Body (deep, muscular)
+  c.fillStyle = '#7a3a28';
+  c.beginPath(); c.ellipse(2, -4, 38, 22, -0.05, 0, Math.PI*2); c.fill();
+  // Belly
+  c.fillStyle = '#c08070';
+  c.beginPath(); c.ellipse(4, 14, 28, 7, 0, 0, Math.PI*2); c.fill();
+  // Side stripe (theropod countershading)
+  c.fillStyle = '#5a2818';
+  c.beginPath(); c.ellipse(2, 0, 32, 3, -0.05, 0, Math.PI*2); c.fill();
+  // Rows of larger osteoderms (Carnotaurus had distinctive bumps in rows)
+  c.fillStyle = '#3a1810';
+  // Top row
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.arc(-20 + i * 6, -22, 2.5, 0, Math.PI*2); c.fill();
+  }
+  // Middle row (offset)
+  c.fillStyle = '#5a2818';
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.arc(-16 + i * 6, -10, 2, 0, Math.PI*2); c.fill();
+  }
+  // Highlight bumps
+  c.fillStyle = '#9a5040';
+  for (let i = 0; i < 8; i++) {
+    c.beginPath();
+    c.arc(-21 + i * 6, -23, 1, 0, Math.PI*2); c.fill();
+  }
+  // Near back leg (powerful, longer)
+  c.fillStyle = '#7a3a28';
+  c.beginPath();
+  c.moveTo(-2, 6); c.lineTo(-8 - sprint, 28); c.lineTo(2 - sprint, 48);
+  c.lineTo(10 - sprint, 52); c.lineTo(16 - sprint, 48); c.lineTo(14, 30); c.lineTo(8, 12);
+  c.closePath(); c.fill();
+  // Thigh muscle bulge
+  c.fillStyle = '#5a2818';
+  c.beginPath(); c.ellipse(2, 16, 10, 8, 0.1, 0, Math.PI*2); c.fill();
+  // Foot claws
+  c.fillStyle = 'white';
+  [[-2 - sprint, 52], [4 - sprint, 52], [10 - sprint, 52], [14 - sprint, 52]].forEach(([fx, fy]) => {
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 2, fy + 5); c.lineTo(fx + 5, fy);
+    c.closePath(); c.fill();
+  });
+  // ABSURDLY TINY ARMS (Carnotaurus's signature - smaller than T. rex's)
+  c.fillStyle = '#5a2818';
+  // Two stubby vestigial arms
+  c.beginPath();
+  c.ellipse(20, 6, 4, 2, 0.2, 0, Math.PI*2); c.fill();
+  c.beginPath();
+  c.ellipse(20, 12, 4, 2, 0.3, 0, Math.PI*2); c.fill();
+  // Tiny non-functional fingers
+  c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = 0.8;
+  c.beginPath(); c.moveTo(23, 6); c.lineTo(25, 5); c.stroke();
+  c.beginPath(); c.moveTo(23, 7); c.lineTo(25, 8); c.stroke();
+  c.beginPath(); c.moveTo(23, 12); c.lineTo(25, 11); c.stroke();
+  c.beginPath(); c.moveTo(23, 13); c.lineTo(25, 14); c.stroke();
+  // HEAD (deep, short, bull-like - shaken laterally on action)
+  c.save();
+  c.translate(0, 0);
+  c.rotate(shake * 0.04);
+  // Head body (deep and short)
+  c.fillStyle = '#8a4030';
+  c.beginPath(); c.ellipse(36, -28, 18, 18, -0.05, 0, Math.PI*2); c.fill();
+  // Snout (short, bulldog-like)
+  c.beginPath(); c.ellipse(50, -22, 12, 11, 0, 0, Math.PI*2); c.fill();
+  // Jaw (opens slightly with action)
+  const jawOpen = action ? 5 : 1;
+  c.fillStyle = '#5a2818';
+  c.beginPath();
+  c.moveTo(22, -22);
+  c.lineTo(60, -19 + jawOpen * 0.2);
+  c.lineTo(60, -13 + jawOpen);
+  c.lineTo(22, -10);
+  c.closePath(); c.fill();
+  // Teeth
+  c.fillStyle = 'white';
+  for (let i = 0; i < 7; i++) {
+    c.beginPath();
+    c.moveTo(26 + i * 5, -22);
+    c.lineTo(28 + i * 5, -14);
+    c.lineTo(30 + i * 5, -22);
+    c.closePath(); c.fill();
+  }
+  for (let i = 0; i < 6; i++) {
+    c.beginPath();
+    c.moveTo(28 + i * 5, -10 + jawOpen);
+    c.lineTo(30 + i * 5, -18 + jawOpen);
+    c.lineTo(32 + i * 5, -10 + jawOpen);
+    c.closePath(); c.fill();
+  }
+  // SIGNATURE BULL HORNS (large, lateral, above eyes)
+  // Left/back horn
+  c.fillStyle = '#a08068';
+  c.beginPath();
+  c.moveTo(28, -42);
+  c.quadraticCurveTo(18, -54, 8, -50);
+  c.quadraticCurveTo(14, -42, 26, -38);
+  c.closePath(); c.fill();
+  // Horn shading
+  c.fillStyle = '#604838';
+  c.beginPath();
+  c.moveTo(28, -42);
+  c.quadraticCurveTo(20, -50, 12, -49);
+  c.quadraticCurveTo(18, -44, 26, -40);
+  c.closePath(); c.fill();
+  // Horn ridges
+  c.strokeStyle = '#3a2818'; c.lineWidth = 0.8;
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.arc(20 - i * 3, -45 - i, 1.5, 0, Math.PI);
+    c.stroke();
+  }
+  // Right/front horn (more visible)
+  c.fillStyle = '#a08068';
+  c.beginPath();
+  c.moveTo(40, -42);
+  c.quadraticCurveTo(50, -56, 60, -50);
+  c.quadraticCurveTo(54, -42, 42, -38);
+  c.closePath(); c.fill();
+  c.fillStyle = '#604838';
+  c.beginPath();
+  c.moveTo(40, -42);
+  c.quadraticCurveTo(48, -52, 56, -49);
+  c.quadraticCurveTo(50, -44, 42, -40);
+  c.closePath(); c.fill();
+  c.strokeStyle = '#3a2818'; c.lineWidth = 0.8;
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.arc(48 + i * 3, -45 - i, 1.5, 0, Math.PI);
+    c.stroke();
+  }
+  // Horn highlights
+  c.fillStyle = '#d8c0a0';
+  c.beginPath();
+  c.moveTo(54, -50); c.lineTo(58, -50); c.lineTo(56, -47);
+  c.closePath(); c.fill();
+  c.beginPath();
+  c.moveTo(8, -50); c.lineTo(12, -50); c.lineTo(10, -47);
+  c.closePath(); c.fill();
+  // Eye (binocular vision - eyes face slightly forward)
+  c.fillStyle = '#cc8822';
+  c.beginPath(); c.arc(36, -32, 3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(37, -32, 1.2, 2.4, 0, 0, Math.PI*2); c.fill();
+  // Heavy brow ridge between horns
+  c.fillStyle = '#5a2818';
+  c.beginPath();
+  c.moveTo(28, -38); c.lineTo(36, -34); c.lineTo(44, -38); c.lineTo(42, -36); c.lineTo(36, -32); c.lineTo(30, -36);
+  c.closePath(); c.fill();
+  // Nostril
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(58, -22, 1.6, 0, Math.PI*2); c.fill();
+  // Head shake motion blur lines
+  if (action) {
+    c.strokeStyle = 'rgba(255, 200, 180, 0.5)'; c.lineWidth = 1.5;
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.moveTo(8 - i * 2, -50 + i * 2);
+      c.lineTo(2 - i * 2, -50 + i * 2);
+      c.stroke();
+      c.beginPath();
+      c.moveTo(60 + i * 2, -50 + i * 2);
+      c.lineTo(66 + i * 2, -50 + i * 2);
+      c.stroke();
+    }
+  }
+  c.restore();
+  // Sprint dust at feet
+  if (Math.abs(sprint) > 2) {
+    c.fillStyle = 'rgba(140, 100, 70, 0.4)';
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.arc(-15 - i * 6, 50, 3 + i, 0, Math.PI*2); c.fill();
+    }
+  }
+  c.restore();
+}
+
+// ---------- FOOD ITEM DRAWINGS ----------
+
+function drawFly(c, item, t) {
+  const flutter = Math.sin(t * 0.4 + item.x * 0.05) * 3;
+  c.save(); c.translate(item.x, item.y + flutter);
+  c.fillStyle = 'rgba(240, 240, 255, 0.7)';
+  c.beginPath(); c.ellipse(-3, -3, 5, 2.5, 0.3, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(3, -3, 5, 2.5, -0.3, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#222';
+  c.beginPath(); c.ellipse(0, 0, 5, 3, 0, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#ff2222';
+  c.beginPath(); c.arc(-3, -1, 1.5, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawMouse(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const hop = Math.abs(Math.sin(t * 0.15)) * 3;
+  c.translate(0, -hop);
+  c.fillStyle = '#b09878';
+  c.beginPath(); c.ellipse(0, 0, 11, 6, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(-9, -2, 5, 4, 0, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#d8b898';
+  c.beginPath(); c.arc(-11, -5, 2.5, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(-8, -6, 2.2, 0, Math.PI*2); c.fill();
+  c.strokeStyle = '#b09878'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(8, 0); c.quadraticCurveTo(14, -4, 20, 2); c.stroke();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(-11, -3, 0.8, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#ff88aa';
+  c.beginPath(); c.arc(-13, -1, 0.6, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawJellyfish(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  c.fillStyle = 'rgba(255, 140, 200, 0.8)';
+  c.beginPath(); c.arc(0, 0, 13, Math.PI, 0); c.fill();
+  c.fillStyle = 'rgba(255, 180, 220, 0.6)';
+  c.beginPath(); c.ellipse(0, -3, 10, 4, 0, 0, Math.PI*2); c.fill();
+  c.strokeStyle = 'rgba(255, 140, 200, 0.7)'; c.lineWidth = 1.8;
+  for (let i = -2; i <= 2; i++) {
+    c.beginPath();
+    c.moveTo(i * 4, 0);
+    c.quadraticCurveTo(i*4 + Math.sin(t * 0.15 + i)*3, 10, i*4 + Math.sin(t * 0.15 + i)*4, 22);
+    c.stroke();
+  }
+  c.restore();
+}
+
+function drawFish(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const wiggle = Math.sin(t * 0.2) * 3;
+  c.fillStyle = item.color;
+  c.beginPath(); c.ellipse(0, 0, 13, 7, 0, 0, Math.PI*2); c.fill();
+  c.fillStyle = item.color;
+  c.beginPath();
+  c.moveTo(10, 0); c.lineTo(20, -6 + wiggle); c.lineTo(20, 6 + wiggle);
+  c.closePath(); c.fill();
+  c.fillStyle = 'rgba(255,255,255,0.4)';
+  c.beginPath(); c.ellipse(-3, -2, 8, 3, 0, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(-7, -1, 2.5, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(-8, -1, 1.2, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawFruit(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  c.fillStyle = '#d83322';
+  c.beginPath(); c.arc(0, 0, 9, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#ff6644';
+  c.beginPath(); c.arc(-3, -3, 4, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#4a6a20';
+  c.fillRect(-1, -12, 2, 5);
+  c.beginPath(); c.ellipse(4, -10, 4, 2, 0.3, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawLeaves(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  c.rotate(Math.sin(t * 0.05) * 0.15);
+  c.fillStyle = '#3a8a3a';
+  c.beginPath(); c.ellipse(0, 0, 10, 6, 0.3, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#4a9a4a';
+  c.beginPath(); c.ellipse(-4, 4, 8, 5, -0.3, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#2a6a2a';
+  c.beginPath(); c.ellipse(5, -3, 7, 4, 0.5, 0, Math.PI*2); c.fill();
+  c.strokeStyle = '#1a4a1a'; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(-8, 0); c.lineTo(8, 0); c.stroke();
+  c.restore();
+}
+
+function drawPrey(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const run = Math.sin(t * 0.3) * 2;
+  c.translate(0, -Math.abs(run));
+  c.fillStyle = '#c09470';
+  c.beginPath(); c.ellipse(0, 0, 13, 5, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(-11, -1, 5, 4, 0, 0, Math.PI*2); c.fill();
+  c.beginPath();
+  c.moveTo(11, 0); c.lineTo(22, 1); c.lineTo(11, 3); c.closePath(); c.fill();
+  c.fillStyle = '#a07450';
+  c.fillRect(-6, 3, 2, 4 + run);
+  c.fillRect(4, 3, 2, 4 - run);
+  c.fillStyle = '#ffcc33';
+  c.beginPath(); c.arc(-12, -2, 1, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#6a4428';
+  c.beginPath(); c.arc(-4, -3, 1, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(2, -3, 1, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawSmallDino(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const bob = Math.sin(t * 0.2) * 2;
+  c.translate(0, bob);
+  c.fillStyle = '#8a6234';
+  c.beginPath(); c.ellipse(0, 0, 18, 10, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(-15, -5, 9, 7, 0, 0, Math.PI*2); c.fill();
+  c.beginPath();
+  c.moveTo(15, -2); c.lineTo(30, 0); c.lineTo(15, 4); c.closePath(); c.fill();
+  c.fillStyle = '#6a4624';
+  c.fillRect(-8, 8, 4, 10);
+  c.fillRect(6, 8, 4, 10);
+  c.fillStyle = '#5a3a1c';
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.moveTo(-8 + i * 8, -10);
+    c.lineTo(-6 + i * 8, -14);
+    c.lineTo(-4 + i * 8, -10);
+    c.closePath(); c.fill();
+  }
+  c.fillStyle = '#ffcc33';
+  c.beginPath(); c.arc(-17, -6, 1.3, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(-17, -6, 0.7, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawFern(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const sway = Math.sin(t * 0.06 + item.x * 0.01) * 2;
+  // Stem
+  c.strokeStyle = '#3a5a28'; c.lineWidth = 2.5;
+  c.beginPath();
+  c.moveTo(0, 18);
+  c.quadraticCurveTo(sway * 0.5, 0, sway, -18);
+  c.stroke();
+  // Leaflets (bipinnate look)
+  c.fillStyle = '#4a8a38';
+  for (let i = 0; i < 6; i++) {
+    const fy = -15 + i * 7;
+    const fs = Math.max(3, 13 - i * 1.8);
+    const off = sway * (1 - i * 0.1);
+    c.beginPath();
+    c.ellipse(off - fs * 0.5, fy, fs * 0.5, 2.5, -0.35, 0, Math.PI*2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(off + fs * 0.5, fy, fs * 0.5, 2.5, 0.35, 0, Math.PI*2);
+    c.fill();
+  }
+  // Tip coil
+  c.fillStyle = '#5a9a48';
+  c.beginPath();
+  c.arc(sway, -20, 3, 0, Math.PI*2);
+  c.fill();
+  c.strokeStyle = '#2a5a28'; c.lineWidth = 1;
+  c.beginPath();
+  c.arc(sway, -20, 2, 0, Math.PI * 1.5);
+  c.stroke();
+  c.restore();
+}
+
+function drawBigFish(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const swim = Math.sin(t * 0.12 + item.x * 0.01) * 3;
+  c.translate(0, swim);
+  // Body (lobefin / sarcopterygian)
+  c.fillStyle = '#4a6878';
+  c.beginPath(); c.ellipse(0, 0, 24, 11, 0, 0, Math.PI*2); c.fill();
+  // Belly lighter
+  c.fillStyle = '#88b0c0';
+  c.beginPath(); c.ellipse(0, 4, 20, 5, 0, 0, Math.PI*2); c.fill();
+  // Tail fin (tri-lobed)
+  c.fillStyle = '#3a5868';
+  c.beginPath();
+  c.moveTo(22, -2); c.lineTo(36, -10); c.lineTo(32, -2);
+  c.lineTo(38, 0); c.lineTo(32, 3); c.lineTo(36, 10); c.lineTo(22, 4);
+  c.closePath(); c.fill();
+  // Lobe pectoral fins
+  c.beginPath(); c.ellipse(-2, 10, 6, 3, 0.4, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(10, 10, 5, 3, -0.3, 0, Math.PI*2); c.fill();
+  // Dorsal fins
+  c.beginPath(); c.ellipse(-4, -10, 5, 4, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(10, -9, 6, 4, 0, 0, Math.PI*2); c.fill();
+  // Scale spots
+  c.fillStyle = '#2a485a';
+  [[-10, -3], [-2, -3], [6, -2], [14, -1], [-6, 3], [4, 4], [12, 3]].forEach(([dx, dy]) => {
+    c.beginPath(); c.arc(dx, dy, 1.3, 0, Math.PI*2); c.fill();
+  });
+  // Gill line
+  c.strokeStyle = '#2a485a'; c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(-12, -6); c.quadraticCurveTo(-14, 0, -12, 6);
+  c.stroke();
+  // Eye
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(-16, -2, 2.6, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(-16, -2, 1.3, 0, Math.PI*2); c.fill();
+  // Mouth
+  c.strokeStyle = 'black'; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(-22, 2); c.lineTo(-18, 4); c.stroke();
+  c.restore();
+}
+
+function drawOrnithopod(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const hop = Math.abs(Math.sin(t * 0.25)) * 3;
+  c.translate(0, -hop);
+  // Tail
+  c.fillStyle = '#7aa078';
+  c.beginPath();
+  c.moveTo(-10, -2);
+  c.quadraticCurveTo(-22, -6, -30, 0);
+  c.lineTo(-30, 3);
+  c.quadraticCurveTo(-22, 2, -10, 4);
+  c.closePath(); c.fill();
+  // Body
+  c.beginPath(); c.ellipse(-2, 0, 14, 8, -0.1, 0, Math.PI*2); c.fill();
+  // Belly lighter
+  c.fillStyle = '#b8d8a8';
+  c.beginPath(); c.ellipse(-2, 5, 10, 3, 0, 0, Math.PI*2); c.fill();
+  // Head
+  c.fillStyle = '#7aa078';
+  c.beginPath(); c.ellipse(10, -4, 8, 6, -0.1, 0, Math.PI*2); c.fill();
+  // Duck beak
+  c.fillStyle = '#5a7858';
+  c.beginPath();
+  c.moveTo(15, -3); c.lineTo(21, -2); c.lineTo(21, 0); c.lineTo(15, 1);
+  c.closePath(); c.fill();
+  // Legs (hopping)
+  c.fillStyle = '#5a7858';
+  c.fillRect(-6, 5, 3, 6 + hop);
+  c.fillRect(2, 5, 3, 6 - hop);
+  // Stripes on back
+  c.fillStyle = '#5a7858';
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.ellipse(-6 + i * 5, -5, 2, 1.2, 0.2, 0, Math.PI*2);
+    c.fill();
+  }
+  // Eye
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(12, -5, 1, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(12.5, -5.3, 0.4, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawAmmonite(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const drift = Math.sin(t * 0.08 + item.x * 0.02) * 2;
+  c.translate(0, drift);
+  // Tentacles trailing behind (to the right since shell faces left)
+  c.strokeStyle = 'rgba(200, 130, 80, 0.85)'; c.lineWidth = 1.5;
+  for (let i = 0; i < 6; i++) {
+    const ty = -5 + i * 2;
+    const wiggle = Math.sin(t * 0.15 + i) * 3;
+    c.beginPath();
+    c.moveTo(10, ty);
+    c.quadraticCurveTo(16 + wiggle, ty + 1, 22 + wiggle, ty + wiggle * 0.5);
+    c.stroke();
+  }
+  // Shell outer
+  c.fillStyle = '#c8a06a';
+  c.beginPath(); c.arc(0, 0, 14, 0, Math.PI*2); c.fill();
+  // Shell inner (darker, spiral)
+  c.fillStyle = '#8a6438';
+  c.beginPath(); c.arc(-2, -1, 10, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#c8a06a';
+  c.beginPath(); c.arc(-3, -2, 6, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#8a6438';
+  c.beginPath(); c.arc(-3.5, -2.5, 3, 0, Math.PI*2); c.fill();
+  // Ribs on shell (outer whorl)
+  c.strokeStyle = '#6a4828'; c.lineWidth = 1.2;
+  for (let i = 0; i < 10; i++) {
+    const ang = i * (Math.PI * 2 / 10);
+    const r1 = 10, r2 = 14;
+    c.beginPath();
+    c.moveTo(Math.cos(ang) * r1, Math.sin(ang) * r1);
+    c.lineTo(Math.cos(ang) * r2, Math.sin(ang) * r2);
+    c.stroke();
+  }
+  // Shell opening / aperture where body pokes out
+  c.fillStyle = '#5a3a20';
+  c.beginPath();
+  c.ellipse(10, 0, 4, 5, 0, 0, Math.PI*2); c.fill();
+  // Eye peeking from shell
+  c.fillStyle = '#ffcc44';
+  c.beginPath(); c.arc(11, -1, 1.4, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(11, -1, 0.6, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawBelemnite(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const jet = Math.sin(t * 0.2 + item.x * 0.03) * 2;
+  c.translate(0, jet);
+  // Pointed rostrum (bullet-shaped back)
+  c.fillStyle = '#6a4a78';
+  c.beginPath();
+  c.moveTo(-18, 0);
+  c.lineTo(-4, -4);
+  c.lineTo(-4, 4);
+  c.closePath(); c.fill();
+  // Body / mantle (torpedo shape)
+  c.fillStyle = '#a878b8';
+  c.beginPath(); c.ellipse(2, 0, 12, 5, 0, 0, Math.PI*2); c.fill();
+  // Mantle highlight
+  c.fillStyle = '#c8a0d8';
+  c.beginPath(); c.ellipse(2, -2, 10, 1.5, 0, 0, Math.PI*2); c.fill();
+  // Lateral fins (two small triangular fins)
+  c.fillStyle = '#8a5898';
+  c.beginPath();
+  c.moveTo(-6, -5); c.lineTo(-2, -9); c.lineTo(2, -5);
+  c.closePath(); c.fill();
+  c.beginPath();
+  c.moveTo(-6, 5); c.lineTo(-2, 9); c.lineTo(2, 5);
+  c.closePath(); c.fill();
+  // Head (blunt front)
+  c.fillStyle = '#b888c8';
+  c.beginPath(); c.ellipse(12, 0, 4, 4, 0, 0, Math.PI*2); c.fill();
+  // Tentacles (10 short arms)
+  c.strokeStyle = '#8a5898'; c.lineWidth = 1.3;
+  for (let i = 0; i < 8; i++) {
+    const ang = -0.9 + i * 0.25;
+    const wiggle = Math.sin(t * 0.2 + i) * 1.5;
+    const tipX = 14 + Math.cos(ang) * 8;
+    const tipY = Math.sin(ang) * 5 + wiggle;
+    c.beginPath();
+    c.moveTo(13, Math.sin(ang) * 3);
+    c.quadraticCurveTo(15 + wiggle * 0.5, (Math.sin(ang) * 4 + tipY) / 2, tipX, tipY);
+    c.stroke();
+  }
+  // Eye (large cephalopod eye)
+  c.fillStyle = '#f0e8c0';
+  c.beginPath(); c.arc(10, -1, 2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath();
+  c.ellipse(10.5, -1, 0.6, 1.4, 0, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawConiferBranch(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  const sway = Math.sin(t * 0.05 + item.x * 0.01) * 2;
+  c.rotate(sway * 0.04);
+  // Branch
+  c.strokeStyle = '#5a3818'; c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(-22, 6); c.lineTo(20, -2); c.stroke();
+  // Needles in tufts along branch
+  c.strokeStyle = '#3a6a28'; c.lineWidth = 1.2;
+  for (let i = 0; i < 7; i++) {
+    const bx = -18 + i * 6;
+    const by = 4 - i * 0.8;
+    // Needles spreading out
+    for (let j = -3; j <= 3; j++) {
+      const ang = j * 0.18;
+      c.beginPath();
+      c.moveTo(bx, by);
+      c.lineTo(bx + Math.cos(ang - 0.3) * 7, by + Math.sin(ang - 0.3) * 7 - 4);
+      c.stroke();
+    }
+  }
+  // Pine cone at one end
+  c.fillStyle = '#7a4828';
+  c.beginPath(); c.ellipse(-22, 6, 5, 7, 0.3, 0, Math.PI*2); c.fill();
+  // Cone scales
+  c.fillStyle = '#5a3018';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.arc(-23 + (i % 2) * 2, 2 + i * 2, 1.5, 0, Math.PI*2);
+    c.fill();
+  }
+  // Small berry / fruit at other end
+  c.fillStyle = '#a83838';
+  c.beginPath(); c.arc(20, -2, 2.5, 0, Math.PI*2); c.fill();
+  c.fillStyle = '#c85858';
+  c.beginPath(); c.arc(19, -3, 1, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+
+function drawCynodont(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  // Scuttling motion
+  const scuttle = Math.abs(Math.sin(t * 0.4)) * 2;
+  c.translate(0, -scuttle);
+  // Tail (thin, ratlike)
+  c.strokeStyle = '#7a5838'; c.lineWidth = 1.8;
+  c.beginPath();
+  c.moveTo(-10, 1);
+  c.quadraticCurveTo(-18, -1, -22, -3 + Math.sin(t * 0.4) * 2);
+  c.stroke();
+  // Body (small, furry-looking)
+  c.fillStyle = '#9a7050';
+  c.beginPath(); c.ellipse(-2, 0, 11, 5, -0.05, 0, Math.PI*2); c.fill();
+  // Lighter belly
+  c.fillStyle = '#c8a080';
+  c.beginPath(); c.ellipse(-2, 3, 8, 2, 0, 0, Math.PI*2); c.fill();
+  // Fur texture (small dashes)
+  c.strokeStyle = '#6a4830'; c.lineWidth = 0.6;
+  for (let i = 0; i < 8; i++) {
+    const fx = -10 + i * 2.5;
+    const fy = -3 + Math.sin(i) * 2;
+    c.beginPath();
+    c.moveTo(fx, fy); c.lineTo(fx + 1, fy - 1.5);
+    c.stroke();
+  }
+  // Head (rounded with snout)
+  c.fillStyle = '#9a7050';
+  c.beginPath(); c.ellipse(8, -1, 6, 4, 0.05, 0, Math.PI*2); c.fill();
+  // Snout
+  c.beginPath(); c.ellipse(13, 0, 3, 2.5, 0, 0, Math.PI*2); c.fill();
+  // Two small canine teeth (cynodonts had differentiated teeth)
+  c.fillStyle = 'white';
+  c.fillRect(13, 1.5, 0.6, 1.5);
+  c.fillRect(14.5, 1.5, 0.6, 1.5);
+  // Whiskers
+  c.strokeStyle = 'rgba(80, 60, 40, 0.7)'; c.lineWidth = 0.5;
+  c.beginPath(); c.moveTo(15, 0); c.lineTo(20, -1); c.stroke();
+  c.beginPath(); c.moveTo(15, 1); c.lineTo(20, 2); c.stroke();
+  // Ear (small mammal-like)
+  c.fillStyle = '#7a5838';
+  c.beginPath(); c.ellipse(5, -4, 2, 2.5, -0.2, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(10, -2, 0.9, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(10.3, -2.2, 0.4, 0, Math.PI*2); c.fill();
+  // Nose
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(15, 0, 0.6, 0, Math.PI*2); c.fill();
+  // Legs (4 small legs)
+  c.fillStyle = '#7a5838';
+  c.fillRect(-6, 4, 1.5, 3 + Math.sin(t * 0.4) * 1);
+  c.fillRect(-2, 4, 1.5, 3 - Math.sin(t * 0.4) * 1);
+  c.fillRect(2, 4, 1.5, 3 + Math.sin(t * 0.4 + 1) * 1);
+  c.fillRect(6, 4, 1.5, 3 - Math.sin(t * 0.4 + 1) * 1);
+  c.restore();
+}
+
+function drawCrocodylomorph(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  // Slithering walk
+  const slither = Math.sin(t * 0.2) * 1.5;
+  c.translate(0, slither);
+  // Long tail
+  c.fillStyle = '#4a6a3a';
+  c.beginPath();
+  c.moveTo(-12, 0);
+  c.quadraticCurveTo(-22, -2 + slither, -28, 2 + slither);
+  c.lineTo(-30, 4 + slither);
+  c.quadraticCurveTo(-22, 2 + slither, -12, 3);
+  c.closePath(); c.fill();
+  // Tail scutes
+  c.fillStyle = '#2a4828';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.moveTo(-14 - i * 4, -2 + slither * 0.3);
+    c.lineTo(-12 - i * 4, -4 + slither * 0.3);
+    c.lineTo(-10 - i * 4, -2 + slither * 0.3);
+    c.closePath(); c.fill();
+  }
+  // Body
+  c.fillStyle = '#5a7a48';
+  c.beginPath(); c.ellipse(-2, 0, 12, 4, 0, 0, Math.PI*2); c.fill();
+  // Lighter belly
+  c.fillStyle = '#a8c890';
+  c.beginPath(); c.ellipse(-2, 3, 10, 1.5, 0, 0, Math.PI*2); c.fill();
+  // Back scute row
+  c.fillStyle = '#2a4828';
+  for (let i = 0; i < 5; i++) {
+    c.beginPath();
+    c.moveTo(-8 + i * 3, -3);
+    c.lineTo(-7 + i * 3, -5);
+    c.lineTo(-6 + i * 3, -3);
+    c.closePath(); c.fill();
+  }
+  // Head (small triangular crocodilian)
+  c.fillStyle = '#5a7a48';
+  c.beginPath(); c.ellipse(10, 0, 6, 3, 0, 0, Math.PI*2); c.fill();
+  // Snout
+  c.fillStyle = '#4a6a3a';
+  c.beginPath();
+  c.moveTo(13, -1); c.lineTo(18, 0); c.lineTo(13, 2);
+  c.closePath(); c.fill();
+  // Tiny teeth
+  c.fillStyle = 'white';
+  c.fillRect(15, 0.5, 0.5, 1);
+  c.fillRect(16, 0.5, 0.5, 1);
+  c.fillRect(15, -0.5, 0.5, 0.8);
+  // Eye
+  c.fillStyle = '#ffcc44';
+  c.beginPath(); c.arc(10, -2, 1.2, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'black';
+  c.beginPath(); c.ellipse(10, -2, 0.3, 0.9, 0, 0, Math.PI*2); c.fill();
+  // Four short legs
+  c.fillStyle = '#3a5828';
+  c.fillRect(-6, 3, 2, 3);
+  c.fillRect(-1, 3, 2, 3);
+  c.fillRect(4, 3, 2, 3);
+  c.restore();
+}
+
+function drawBabyTitanosaur(c, item, t) {
+  c.save(); c.translate(item.x, item.y);
+  // Toddling waddle
+  const waddle = Math.sin(t * 0.18) * 1.5;
+  c.translate(0, -Math.abs(waddle));
+  // Tail
+  c.fillStyle = '#9a7858';
+  c.beginPath();
+  c.moveTo(-10, 0);
+  c.quadraticCurveTo(-18, -2 + waddle, -22, 1 + waddle);
+  c.lineTo(-22, 3 + waddle);
+  c.quadraticCurveTo(-18, 1 + waddle, -10, 3);
+  c.closePath(); c.fill();
+  // Body (chubby baby proportions)
+  c.beginPath(); c.ellipse(-2, 0, 11, 7, 0, 0, Math.PI*2); c.fill();
+  // Belly lighter
+  c.fillStyle = '#c8ac88';
+  c.beginPath(); c.ellipse(-2, 4, 9, 2.5, 0, 0, Math.PI*2); c.fill();
+  // Subtle skin pattern (titanosaur osteoderms)
+  c.fillStyle = '#7a5840';
+  for (let i = 0; i < 4; i++) {
+    c.beginPath();
+    c.arc(-7 + i * 4, -3, 1, 0, Math.PI*2); c.fill();
+  }
+  // Long neck (proportionally short for a baby but still long)
+  c.fillStyle = '#9a7858';
+  c.beginPath();
+  c.moveTo(8, -2);
+  c.bezierCurveTo(12, -10, 16, -14, 18, -16);
+  c.lineTo(20, -14);
+  c.bezierCurveTo(15, -12, 12, -8, 9, -1);
+  c.closePath(); c.fill();
+  // Tiny head
+  c.fillStyle = '#9a7858';
+  c.beginPath(); c.ellipse(20, -16, 4, 3, 0.1, 0, Math.PI*2); c.fill();
+  // Eye
+  c.fillStyle = 'black';
+  c.beginPath(); c.arc(21, -17, 0.8, 0, Math.PI*2); c.fill();
+  c.fillStyle = 'white';
+  c.beginPath(); c.arc(21.3, -17.3, 0.3, 0, Math.PI*2); c.fill();
+  // Tiny mouth line
+  c.strokeStyle = '#5a3a20'; c.lineWidth = 0.5;
+  c.beginPath(); c.moveTo(22, -15); c.lineTo(24, -15); c.stroke();
+  // Four stubby legs
+  c.fillStyle = '#7a5840';
+  c.fillRect(-7, 5, 2.5, 5 + waddle);
+  c.fillRect(-2, 5, 2.5, 5 - waddle);
+  c.fillRect(3, 5, 2.5, 5 + waddle);
+  c.fillRect(7, 5, 2.5, 5 - waddle);
+  c.restore();
+}
+
+// ---------- ANIMAL DEFINITIONS ----------
+
+const ANIMALS = {
+  frog: {
+    name: 'Frog', draw: drawFrog,
+    bgSky: '#87ceeb', bgSky2: '#b8e0eb',
+    bgGround: '#4a8a3a',
+    groundHeight: 110, speed: 3.2, jumpPower: 13,
+    hint: 'Jump up (▲) to catch flies. Action for tongue lash.',
+    food: 'fly', drawFood: drawFly,
+    spawnY: () => H - 140 - Math.random() * 180,
+    itemSpeed: () => -2.2 - Math.random(),
+    hasFloat: true
+  },
+  snake: {
+    name: 'Snake', draw: drawSnake,
+    bgSky: '#e8a958', bgSky2: '#d88838',
+    bgGround: '#d4a868',
+    groundHeight: 90, speed: 2.8, jumpPower: 0,
+    hint: 'Slither along the sand. Catch mice.',
+    food: 'mouse', drawFood: drawMouse,
+    spawnY: () => H - 95,
+    itemSpeed: () => -2.2 - Math.random() * 1.5
+  },
+  turtle: {
+    name: 'Turtle', draw: drawTurtle,
+    bgSky: '#5ab8d8', bgSky2: '#2a6884',
+    bgGround: '#f0dcac',
+    groundHeight: 80, speed: 1.8, jumpPower: 0,
+    hint: 'Slow and steady. Jellyfish drift past.',
+    food: 'jellyfish', drawFood: drawJellyfish,
+    spawnY: () => 80 + Math.random() * (H - 180),
+    itemSpeed: () => -1.2 - Math.random() * 0.8,
+    underwater: true
+  },
+  whale: {
+    name: 'Whale', draw: drawWhale,
+    bgSky: '#2a5a8a', bgSky2: '#0a2a4a',
+    bgGround: '#08182a',
+    groundHeight: 50, speed: 3.8, jumpPower: 0,
+    hint: 'Use surface (▲) and dive (▼) to swim. Hunt fish.',
+    food: 'fish', drawFood: drawFish,
+    spawnY: () => 90 + Math.random() * (H - 180),
+    itemSpeed: () => -2.5 - Math.random() * 2,
+    canSwim: true, underwater: true
+  },
+  elephant: {
+    name: 'Elephant', draw: drawElephant,
+    bgSky: '#f0d898', bgSky2: '#d8b868',
+    bgGround: '#a08458',
+    groundHeight: 100, speed: 2.2, jumpPower: 7,
+    hint: 'Walk the savanna. Gather falling fruit.',
+    food: 'fruit', drawFood: drawFruit,
+    spawnY: () => 40,
+    spawnVY: () => 2.5,
+    itemSpeed: () => -1.6 - Math.random() * 0.8
+  },
+  giraffe: {
+    name: 'Giraffe', draw: drawGiraffe,
+    bgSky: '#f8d078', bgSky2: '#e8a858',
+    bgGround: '#c8a868',
+    groundHeight: 80, speed: 2.5, jumpPower: 0,
+    hint: 'Long neck reaches tall leaves. Action to bend.',
+    food: 'leaves', drawFood: drawLeaves,
+    spawnY: () => 30 + Math.random() * 80,
+    itemSpeed: () => -1.8 - Math.random() * 0.8
+  },
+  velociraptor: {
+    name: 'Raptor', draw: drawRaptor,
+    bgSky: '#a8684a', bgSky2: '#604028',
+    bgGround: '#4a6a2a',
+    groundHeight: 90, speed: 4.5, jumpPower: 11,
+    hint: 'Fast predator. Chase down small prey.',
+    food: 'prey', drawFood: drawPrey,
+    spawnY: () => H - 100,
+    itemSpeed: () => -3.2 - Math.random() * 2
+  },
+  trex: {
+    name: 'T. Rex', draw: drawTrex,
+    bgSky: '#8a3a28', bgSky2: '#4a1a18',
+    bgGround: '#3a2418',
+    groundHeight: 90, speed: 2.8, jumpPower: 0,
+    hint: 'Apex predator. Action to roar and feast.',
+    food: 'dino', drawFood: drawSmallDino,
+    spawnY: () => H - 105,
+    itemSpeed: () => -2.8 - Math.random() * 1.5
+  },
+  stegosaurus: {
+    name: 'Stegosaurus', draw: drawStegosaurus,
+    bgSky: '#c8d878', bgSky2: '#7a9848',
+    bgGround: '#6a5a38',
+    groundHeight: 100, speed: 2, jumpPower: 0,
+    hint: 'Plated herbivore. Action swings the spiked tail.',
+    food: 'fern', drawFood: drawFern,
+    spawnY: () => H - 100 - Math.random() * 30,
+    itemSpeed: () => -1.5 - Math.random() * 0.8
+  },
+  spinosaurus: {
+    name: 'Spinosaurus', draw: drawSpinosaurus,
+    bgSky: '#d89868', bgSky2: '#5a6a4a',
+    bgGround: '#4a5a3a',
+    groundHeight: 90, speed: 3.2, jumpPower: 8,
+    hint: 'Sailed river hunter. Action snaps the jaws.',
+    food: 'bigfish', drawFood: drawBigFish,
+    spawnY: () => 90 + Math.random() * (H - 200),
+    itemSpeed: () => -2.4 - Math.random() * 1.4
+  },
+  allosaurus: {
+    name: 'Allosaurus', draw: drawAllosaurus,
+    bgSky: '#e0b068', bgSky2: '#a06838',
+    bgGround: '#7a5430',
+    groundHeight: 90, speed: 3.6, jumpPower: 9,
+    hint: 'Jurassic predator. Action to bite with brow-horned jaws.',
+    food: 'ornithopod', drawFood: drawOrnithopod,
+    spawnY: () => H - 100,
+    itemSpeed: () => -2.6 - Math.random() * 1.6
+  },
+  mosasaurus: {
+    name: 'Mosasaurus', draw: drawMosasaurus,
+    bgSky: '#3a7898', bgSky2: '#0a2838',
+    bgGround: '#142838',
+    groundHeight: 70, speed: 4.2, jumpPower: 0,
+    hint: 'Cretaceous sea monster. Swim freely, ambush ammonites.',
+    food: 'ammonite', drawFood: drawAmmonite,
+    spawnY: () => 90 + Math.random() * (H - 180),
+    itemSpeed: () => -2.2 - Math.random() * 1.5,
+    canSwim: true, underwater: true
+  },
+  elasmosaurus: {
+    name: 'Elasmosaurus', draw: drawElasmosaurus,
+    bgSky: '#6ab0c8', bgSky2: '#1a4868',
+    bgGround: '#2a4a5a',
+    groundHeight: 60, speed: 3.4, jumpPower: 0,
+    hint: 'Long-necked plesiosaur. Glide through water, snatch belemnites.',
+    food: 'belemnite', drawFood: drawBelemnite,
+    spawnY: () => 60 + Math.random() * (H - 150),
+    itemSpeed: () => -2.0 - Math.random() * 1.3,
+    canSwim: true, underwater: true
+  },
+  diplodocus: {
+    name: 'Diplodocus', draw: drawDiplodocus,
+    bgSky: '#b8c878', bgSky2: '#7a8a48',
+    bgGround: '#5a4830',
+    groundHeight: 100, speed: 1.8, jumpPower: 0,
+    hint: 'Massive sauropod. Action lifts neck and cracks the whip-tail.',
+    food: 'cone', drawFood: drawConiferBranch,
+    spawnY: () => 80 + Math.random() * 160,
+    itemSpeed: () => -1.5 - Math.random() * 0.7
+  },
+  coelophysis: {
+    name: 'Coelophysis', draw: drawCoelophysis,
+    bgSky: '#e89868', bgSky2: '#a04830',
+    bgGround: '#8a3818',
+    groundHeight: 90, speed: 5.2, jumpPower: 13,
+    hint: 'Swift Triassic hunter. Action snaps needle teeth and reaches.',
+    food: 'cynodont', drawFood: drawCynodont,
+    spawnY: () => H - 100,
+    itemSpeed: () => -3.5 - Math.random() * 1.8
+  },
+  ceratosaurus: {
+    name: 'Ceratosaurus', draw: drawCeratosaurus,
+    bgSky: '#a8a868', bgSky2: '#6a6438',
+    bgGround: '#4a3a28',
+    groundHeight: 92, speed: 3, jumpPower: 8,
+    hint: 'Horn-headed predator. Action lunges with the nasal horn.',
+    food: 'crocodylomorph', drawFood: drawCrocodylomorph,
+    spawnY: () => H - 100,
+    itemSpeed: () => -2.4 - Math.random() * 1.4
+  },
+  carnotaurus: {
+    name: 'Carnotaurus', draw: drawCarnotaurus,
+    bgSky: '#d8784a', bgSky2: '#7a3818',
+    bgGround: '#6a3820',
+    groundHeight: 90, speed: 4.6, jumpPower: 10,
+    hint: 'Bull-horned sprinter. Action shakes the head with the horns.',
+    food: 'baby_titan', drawFood: drawBabyTitanosaur,
+    spawnY: () => H - 100,
+    itemSpeed: () => -3.0 - Math.random() * 1.6
+  }
+};
+
+// ---------- GAME STATE ----------
+
+let state = 'menu';
+let animal = null, animalKey = null;
+let score = 0;
+const player = {
+  x: 0, y: 0, vx: 0, vy: 0, facing: 1,
+  actionTimer: 0, onGround: true, catchRadius: 40
+};
+let items = [];
+let particles = [];
+let clouds = [];
+let stars = [];
+let time = 0;
+const keys = {};
+
+function initClouds() {
+  clouds = [];
+  for (let i = 0; i < 5; i++) {
+    clouds.push({
+      x: Math.random() * W, y: 30 + Math.random() * 100,
+      size: 30 + Math.random() * 40, speed: 0.2 + Math.random() * 0.3
+    });
+  }
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 30; i++) {
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H * 0.6,
+      size: 1 + Math.random() * 2
+    });
+  }
+}
+
+// ---------- INPUT ----------
+
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  keys[k] = true;
+  if (k === 'arrowleft' || k === 'a') keys['left'] = true;
+  if (k === 'arrowright' || k === 'd') keys['right'] = true;
+  if (k === 'arrowup' || k === 'w' || k === ' ') { keys['up'] = true; e.preventDefault(); }
+  if (k === 'arrowdown' || k === 's') keys['down'] = true;
+  if (k === 'x' || k === 'z' || k === 'enter') keys['action'] = true;
+});
+window.addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  keys[k] = false;
+  if (k === 'arrowleft' || k === 'a') keys['left'] = false;
+  if (k === 'arrowright' || k === 'd') keys['right'] = false;
+  if (k === 'arrowup' || k === 'w' || k === ' ') keys['up'] = false;
+  if (k === 'arrowdown' || k === 's') keys['down'] = false;
+  if (k === 'x' || k === 'z' || k === 'enter') keys['action'] = false;
+});
+
+document.querySelectorAll('.ctrl').forEach(el => {
+  const k = el.dataset.key;
+  const on = e => { e.preventDefault(); keys[k] = true; };
+  const off = e => { e.preventDefault(); keys[k] = false; };
+  el.addEventListener('touchstart', on, { passive: false });
+  el.addEventListener('mousedown', on);
+  el.addEventListener('touchend', off);
+  el.addEventListener('mouseup', off);
+  el.addEventListener('mouseleave', off);
+  el.addEventListener('touchcancel', off);
+});
+
+document.getElementById('menuBtn').addEventListener('click', () => backToMenu());
+
+// ---------- GAME FLOW ----------
+
+function startGame(key) {
+  animalKey = key;
+  animal = ANIMALS[key];
+  score = 0;
+  items = [];
+  particles = [];
+  player.x = W * 0.28;
+  player.y = animal.canSwim ? H * 0.5 : H - animal.groundHeight - 30;
+  player.vx = 0; player.vy = 0;
+  player.facing = 1;
+  player.actionTimer = 0;
+  player.onGround = true;
+  player.catchRadius = animalScale(animal) * 45;
+  initClouds(); initStars();
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('score').textContent = 'Score: 0';
+  document.getElementById('hint').textContent = animal.hint;
+  const diveBtn = document.getElementById('diveBtn');
+  if (animal.canSwim) diveBtn.classList.remove('hidden');
+  else diveBtn.classList.add('hidden');
+  state = 'play';
+}
+
+function backToMenu() {
+  state = 'menu';
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('hud').classList.add('hidden');
+}
+
+function animalScale(a) {
+  const base = Math.min(W, H) / 700;
+  const map = { frog: 1.1, snake: 1, turtle: 1, whale: 1.1, elephant: 1, giraffe: 1, velociraptor: 1, trex: 1.15, stegosaurus: 1.1, spinosaurus: 1.15, allosaurus: 1.1, mosasaurus: 1.15, elasmosaurus: 1, diplodocus: 1.2, coelophysis: 0.95, ceratosaurus: 1.1, carnotaurus: 1.1 };
+  return Math.max(0.7, Math.min(1.4, base)) * (map[Object.keys(ANIMALS).find(k => ANIMALS[k] === a)] || 1);
+}
+
+// ---------- UPDATE ----------
+
+function spawnItem() {
+  const speed = animal.itemSpeed();
+  items.push({
+    x: W + 30,
+    y: animal.spawnY(),
+    vx: speed,
+    vy: animal.spawnVY ? animal.spawnVY() : 0,
+    color: '#ffaa33',
+    type: animal.food,
+    draw: animal.drawFood,
+    life: 600
+  });
+}
+
+function spawnParticles(x, y, color) {
+  for (let i = 0; i < 12; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = 2 + Math.random() * 3;
+    particles.push({
+      x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2,
+      life: 30 + Math.random() * 15,
+      color: color || '#ffe888',
+      size: 2 + Math.random() * 3
+    });
+  }
+}
+
+let spawnCooldown = 0;
+
+function update() {
+  time++;
+
+  // Input
+  let ix = 0;
+  if (keys['left']) ix = -1;
+  if (keys['right']) ix = 1;
+  const jump = keys['up'];
+  const down = keys['down'];
+  const actionPress = keys['action'];
+
+  const scl = animalScale(animal);
+
+  if (animal.canSwim) {
+    let iy = 0;
+    if (jump) iy = -1;
+    if (down) iy = 1;
+    player.vx += ix * 0.6;
+    player.vy += iy * 0.6;
+    player.vx *= 0.9; player.vy *= 0.9;
+    const maxV = animal.speed;
+    const vmag = Math.hypot(player.vx, player.vy);
+    if (vmag > maxV) { player.vx = player.vx / vmag * maxV; player.vy = player.vy / vmag * maxV; }
+    player.x += player.vx; player.y += player.vy;
+    player.y = Math.max(60, Math.min(H - 40, player.y));
+  } else {
+    player.vx = ix * animal.speed;
+    if (jump && player.onGround && animal.jumpPower > 0) {
+      player.vy = -animal.jumpPower;
+      player.onGround = false;
+    }
+    if (!player.onGround) player.vy += 0.55;
+    player.x += player.vx; player.y += player.vy;
+    const groundY = H - animal.groundHeight - 30 * scl;
+    if (player.y >= groundY) {
+      player.y = groundY; player.vy = 0; player.onGround = true;
+    }
+  }
+
+  player.x = Math.max(60, Math.min(W - 60, player.x));
+  if (ix !== 0) player.facing = ix;
+
+  // Action
+  if (actionPress && player.actionTimer <= 0) {
+    player.actionTimer = 28;
+  }
+  if (player.actionTimer > 0) player.actionTimer--;
+  const actionLevel = player.actionTimer > 0 ? Math.min(1, player.actionTimer / 15) : 0;
+
+  // Spawn items
+  spawnCooldown--;
+  if (spawnCooldown <= 0) {
+    spawnItem();
+    spawnCooldown = 45 + Math.random() * 60;
+  }
+
+  // Update items
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    it.x += it.vx;
+    it.y += it.vy;
+    if (it.vy !== 0 && !animal.underwater) {
+      // For falling items (elephant fruit), land on ground
+      const gy = H - animal.groundHeight - 8;
+      if (it.y >= gy) { it.y = gy; it.vy = 0; }
+    }
+    it.life--;
+
+    // Collision
+    const effRadius = player.catchRadius + (actionLevel * 45);
+    const px = player.x + player.facing * (actionLevel * 30);
+    const py = player.y - (animalKey === 'frog' ? actionLevel * 20 : 0)
+                       - (animalKey === 'elephant' ? actionLevel * 30 : 0);
+    const dx = it.x - px, dy = it.y - py;
+    if (Math.hypot(dx, dy) < effRadius) {
+      score++;
+      document.getElementById('score').textContent = 'Score: ' + score;
+      spawnParticles(it.x, it.y, '#ffe888');
+      items.splice(i, 1);
+      continue;
+    }
+
+    if (it.x < -60 || it.life <= 0) items.splice(i, 1);
+  }
+
+  // Update particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.2; p.vx *= 0.98;
+    p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+
+  // Clouds
+  clouds.forEach(cl => {
+    cl.x -= cl.speed;
+    if (cl.x < -100) { cl.x = W + 50; cl.y = 30 + Math.random() * 100; }
+  });
+}
+
+// ---------- RENDER ----------
+
+function drawBackground() {
+  // Sky gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, animal.bgSky);
+  grad.addColorStop(1, animal.bgSky2 || animal.bgSky);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Sky elements
+  if (animal.underwater) {
+    // Light shafts
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    for (let i = 0; i < 6; i++) {
+      ctx.save();
+      ctx.translate(i * W / 6 + Math.sin(time * 0.003 + i) * 40, 0);
+      ctx.rotate(-0.1);
+      ctx.fillRect(0, 0, 40, H);
+      ctx.restore();
+    }
+    // Bubbles
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    for (let i = 0; i < 25; i++) {
+      const bx = (i * 73 + time * 0.3) % W;
+      const by = (H - (time * 0.8 + i * 137) % H);
+      ctx.beginPath();
+      ctx.arc(bx, by, 2 + (i % 3), 0, Math.PI*2);
+      ctx.fill();
+    }
+  } else if (animalKey === 'trex') {
+    // Dark stars / embers
+    ctx.fillStyle = 'rgba(255, 180, 80, 0.8)';
+    for (let i = 0; i < 8; i++) {
+      const bx = (i * 83 + time * 0.2) % W;
+      const by = (100 + i * 40 + Math.sin(time * 0.02 + i) * 30) % (H * 0.6);
+      ctx.beginPath();
+      ctx.arc(bx, by, 2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } else {
+    // Sun
+    ctx.fillStyle = 'rgba(255, 240, 200, 0.5)';
+    ctx.beginPath(); ctx.arc(W - 80, 80, 45, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255, 250, 220, 0.9)';
+    ctx.beginPath(); ctx.arc(W - 80, 80, 32, 0, Math.PI*2); ctx.fill();
+
+    // Clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    clouds.forEach(cl => {
+      ctx.beginPath();
+      ctx.arc(cl.x, cl.y, cl.size * 0.6, 0, Math.PI*2);
+      ctx.arc(cl.x + cl.size * 0.5, cl.y - cl.size * 0.1, cl.size * 0.55, 0, Math.PI*2);
+      ctx.arc(cl.x + cl.size, cl.y, cl.size * 0.5, 0, Math.PI*2);
+      ctx.arc(cl.x + cl.size * 0.3, cl.y + cl.size * 0.2, cl.size * 0.45, 0, Math.PI*2);
+      ctx.fill();
+    });
+  }
+
+  // Environment (backdrops)
+  drawEnvironment();
+
+  // Ground
+  if (!animal.canSwim) {
+    ctx.fillStyle = animal.bgGround;
+    ctx.fillRect(0, H - animal.groundHeight, W, animal.groundHeight);
+    // Ground texture
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    for (let i = 0; i < 40; i++) {
+      const gx = (i * 47 + time * 0.3) % W;
+      const gy = H - animal.groundHeight + (i * 13) % animal.groundHeight;
+      ctx.fillRect(gx, gy, 3, 2);
+    }
+  } else {
+    // Seabed
+    ctx.fillStyle = animal.bgGround;
+    ctx.fillRect(0, H - animal.groundHeight, W, animal.groundHeight);
+    // Seaweed on bottom
+    ctx.strokeStyle = 'rgba(40, 120, 60, 0.7)'; ctx.lineWidth = 3;
+    for (let i = 0; i < 8; i++) {
+      const sx = (i * 150 + time * 0.4) % (W + 100) - 50;
+      ctx.beginPath();
+      ctx.moveTo(sx, H - animal.groundHeight);
+      for (let j = 0; j < 6; j++) {
+        ctx.lineTo(sx + Math.sin(time * 0.05 + j + i) * 8, H - animal.groundHeight - j * 10 - 5);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+function drawEnvironment() {
+  switch (animalKey) {
+    case 'frog': {
+      // Distant hills
+      ctx.fillStyle = 'rgba(50, 110, 70, 0.5)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 20) {
+        ctx.lineTo(i, H - animal.groundHeight - 30 - Math.sin(i * 0.01) * 25);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Lily pads
+      ctx.fillStyle = '#2a6a2a';
+      for (let i = 0; i < 4; i++) {
+        const px = ((i * 250 + time * 0.5) % (W + 200)) - 100;
+        ctx.beginPath();
+        ctx.ellipse(px, H - 25, 30, 8, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Reeds
+      ctx.strokeStyle = '#3a6a2a'; ctx.lineWidth = 2.5;
+      for (let i = 0; i < 12; i++) {
+        const rx = ((i * 120 + time * 0.8) % (W + 100)) - 50;
+        ctx.beginPath();
+        ctx.moveTo(rx, H - animal.groundHeight + 20);
+        ctx.quadraticCurveTo(rx + Math.sin(time * 0.04 + i) * 3, H - animal.groundHeight - 15, rx + 2, H - animal.groundHeight - 45);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'snake': {
+      // Desert dunes
+      ctx.fillStyle = 'rgba(180, 130, 70, 0.4)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 10) {
+        ctx.lineTo(i, H - animal.groundHeight - 20 - Math.sin(i * 0.008) * 18);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Cacti
+      ctx.fillStyle = '#3a6a38';
+      for (let i = 0; i < 3; i++) {
+        const cx = ((i * 380 + time * 0.6) % (W + 200)) - 100;
+        const cy = H - animal.groundHeight;
+        ctx.fillRect(cx, cy - 55, 12, 55);
+        ctx.fillRect(cx - 8, cy - 35, 8, 15);
+        ctx.fillRect(cx + 12, cy - 40, 8, 18);
+        // Spines
+        ctx.strokeStyle = '#2a5a28'; ctx.lineWidth = 1;
+        for (let j = 0; j < 6; j++) {
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - 50 + j * 8); ctx.lineTo(cx + 13, cy - 50 + j * 8);
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+    case 'turtle': {
+      // Water surface (above)
+      ctx.fillStyle = 'rgba(180, 220, 240, 0.3)';
+      ctx.fillRect(0, 0, W, 40);
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < W; i += 5) {
+        const y = 38 + Math.sin(i * 0.05 + time * 0.05) * 3;
+        if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+      // Coral
+      ctx.fillStyle = '#ff7755';
+      for (let i = 0; i < 4; i++) {
+        const cx = ((i * 280 + time * 0.4) % (W + 150)) - 75;
+        const cy = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy); ctx.lineTo(cx - 8, cy - 30); ctx.lineTo(cx - 4, cy - 32);
+        ctx.lineTo(cx, cy - 25); ctx.lineTo(cx + 4, cy - 32); ctx.lineTo(cx + 8, cy - 30);
+        ctx.closePath(); ctx.fill();
+      }
+      break;
+    }
+    case 'whale': {
+      // Deep water darkening
+      const dg = ctx.createLinearGradient(0, 0, 0, H);
+      dg.addColorStop(0, 'rgba(0,0,0,0)');
+      dg.addColorStop(1, 'rgba(0,0,0,0.4)');
+      ctx.fillStyle = dg;
+      ctx.fillRect(0, 0, W, H);
+      break;
+    }
+    case 'elephant': {
+      // Acacia silhouettes
+      ctx.fillStyle = 'rgba(60, 40, 20, 0.5)';
+      for (let i = 0; i < 3; i++) {
+        const tx = ((i * 420 + time * 0.3) % (W + 300)) - 150;
+        const ty = H - animal.groundHeight;
+        ctx.fillRect(tx, ty - 80, 5, 80);
+        ctx.beginPath();
+        ctx.ellipse(tx + 2, ty - 85, 35, 15, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Grass tufts
+      ctx.strokeStyle = '#7a6428'; ctx.lineWidth = 2;
+      for (let i = 0; i < 15; i++) {
+        const gx = ((i * 110 + time * 0.5) % (W + 80)) - 40;
+        ctx.beginPath();
+        ctx.moveTo(gx, H - animal.groundHeight + 5);
+        ctx.lineTo(gx + 2, H - animal.groundHeight - 8);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'giraffe': {
+      // Tall acacia trees
+      ctx.fillStyle = 'rgba(80, 50, 25, 0.7)';
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 280 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillRect(tx, ty - 130, 6, 130);
+      }
+      ctx.fillStyle = 'rgba(50, 100, 50, 0.85)';
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 280 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.ellipse(tx + 3, ty - 135, 45, 18, 0, 0, Math.PI*2); ctx.fill();
+      }
+      break;
+    }
+    case 'velociraptor': {
+      // Jungle foliage
+      ctx.fillStyle = 'rgba(40, 70, 30, 0.6)';
+      for (let i = 0; i < 6; i++) {
+        const fx = ((i * 200 + time * 0.5) % (W + 150)) - 75;
+        const fy = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.ellipse(fx, fy - 40, 60, 30, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(fx + 30, fy - 20, 50, 25, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Vines
+      ctx.strokeStyle = 'rgba(30, 60, 25, 0.5)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const vx = (i * 180 + time * 0.2) % W;
+        ctx.beginPath();
+        ctx.moveTo(vx, 0);
+        for (let j = 0; j < 8; j++) {
+          ctx.lineTo(vx + Math.sin(time * 0.02 + j + i) * 6, j * 30);
+        }
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'trex': {
+      // Volcano
+      ctx.fillStyle = '#3a1a18';
+      ctx.beginPath();
+      ctx.moveTo(W * 0.6, H - animal.groundHeight);
+      ctx.lineTo(W * 0.75, H - animal.groundHeight - 200);
+      ctx.lineTo(W * 0.9, H - animal.groundHeight);
+      ctx.closePath(); ctx.fill();
+      // Lava
+      ctx.fillStyle = '#ff5522';
+      ctx.beginPath();
+      ctx.moveTo(W * 0.72, H - animal.groundHeight - 185);
+      ctx.lineTo(W * 0.78, H - animal.groundHeight - 185);
+      ctx.lineTo(W * 0.75, H - animal.groundHeight - 200);
+      ctx.closePath(); ctx.fill();
+      // Smoke
+      ctx.fillStyle = 'rgba(80, 40, 30, 0.5)';
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.arc(W * 0.75 + Math.sin(time * 0.02 + i) * 10, H - animal.groundHeight - 220 - i * 25, 18 + i * 4, 0, Math.PI*2);
+        ctx.fill();
+      }
+      // Dead trees
+      ctx.strokeStyle = '#2a1810'; ctx.lineWidth = 3;
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 320 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + 2, ty - 70); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 1, ty - 40); ctx.lineTo(tx - 10, ty - 55); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx + 2, ty - 50); ctx.lineTo(tx + 12, ty - 65); ctx.stroke();
+      }
+      break;
+    }
+    case 'stegosaurus': {
+      // Distant Jurassic hills
+      ctx.fillStyle = 'rgba(90, 130, 70, 0.55)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 18) {
+        ctx.lineTo(i, H - animal.groundHeight - 50 - Math.sin(i * 0.006) * 30);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Ginkgo / conifer trees
+      for (let i = 0; i < 5; i++) {
+        const tx = ((i * 260 + time * 0.35) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a281a';
+        ctx.fillRect(tx, ty - 90, 6, 90);
+        ctx.fillStyle = '#4a7a38';
+        for (let j = 0; j < 4; j++) {
+          ctx.beginPath();
+          ctx.moveTo(tx - 22 + j * 2, ty - 40 - j * 15);
+          ctx.lineTo(tx + 3, ty - 70 - j * 15);
+          ctx.lineTo(tx + 28 - j * 2, ty - 40 - j * 15);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      // Cycad fronds on ground
+      ctx.strokeStyle = '#2a5a28'; ctx.lineWidth = 2.5;
+      for (let i = 0; i < 10; i++) {
+        const fx = ((i * 140 + time * 0.6) % (W + 100)) - 50;
+        const fy = H - animal.groundHeight;
+        for (let j = -2; j <= 2; j++) {
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.quadraticCurveTo(fx + j * 12, fy - 18, fx + j * 20, fy - 28);
+          ctx.stroke();
+        }
+      }
+      // Prehistoric flowers / horsetails
+      ctx.fillStyle = '#d8d8a0';
+      for (let i = 0; i < 8; i++) {
+        const hx = ((i * 170 + time * 0.5) % (W + 80)) - 40;
+        ctx.beginPath();
+        ctx.arc(hx, H - animal.groundHeight - 5, 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'spinosaurus': {
+      // Distant mangrove silhouettes
+      ctx.fillStyle = 'rgba(60, 70, 50, 0.55)';
+      for (let i = 0; i < 5; i++) {
+        const tx = ((i * 280 + time * 0.3) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillRect(tx, ty - 70, 5, 70);
+        ctx.beginPath();
+        ctx.ellipse(tx + 2, ty - 75, 38, 16, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Water band (river running across)
+      const waterTop = H - animal.groundHeight - 2;
+      ctx.fillStyle = 'rgba(80, 130, 150, 0.4)';
+      ctx.fillRect(0, waterTop, W, 4);
+      // Water ripples
+      ctx.strokeStyle = 'rgba(200, 220, 230, 0.5)'; ctx.lineWidth = 1.2;
+      for (let i = 0; i < 10; i++) {
+        const rx = ((i * 180 + time * 0.6) % (W + 60)) - 30;
+        ctx.beginPath();
+        ctx.moveTo(rx, waterTop + 1);
+        ctx.quadraticCurveTo(rx + 8, waterTop - 1, rx + 16, waterTop + 1);
+        ctx.stroke();
+      }
+      // Mangrove roots above ground
+      ctx.strokeStyle = 'rgba(50, 35, 25, 0.8)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const rx = ((i * 200 + time * 0.45) % (W + 150)) - 75;
+        const ry = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry - 45); ctx.lineTo(rx - 10, ry);
+        ctx.moveTo(rx, ry - 45); ctx.lineTo(rx + 10, ry);
+        ctx.moveTo(rx - 4, ry - 35); ctx.lineTo(rx - 14, ry);
+        ctx.moveTo(rx + 4, ry - 35); ctx.lineTo(rx + 14, ry);
+        ctx.stroke();
+      }
+      // Lily pads floating
+      ctx.fillStyle = '#3a7838';
+      for (let i = 0; i < 4; i++) {
+        const lx = ((i * 240 + time * 0.5) % (W + 150)) - 75;
+        ctx.beginPath();
+        ctx.ellipse(lx, H - animal.groundHeight - 2, 16, 4, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Reeds
+      ctx.strokeStyle = '#4a6a2a'; ctx.lineWidth = 2;
+      for (let i = 0; i < 15; i++) {
+        const rx = ((i * 100 + time * 0.7) % (W + 80)) - 40;
+        ctx.beginPath();
+        ctx.moveTo(rx, H - animal.groundHeight + 10);
+        ctx.quadraticCurveTo(rx + Math.sin(time * 0.03 + i) * 3, H - animal.groundHeight - 20, rx + 2, H - animal.groundHeight - 50);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'allosaurus': {
+      // Distant mesas
+      ctx.fillStyle = 'rgba(130, 80, 50, 0.55)';
+      for (let i = 0; i < 3; i++) {
+        const mx = i * W / 3 - 40;
+        const mh = 70 + (i % 2) * 25;
+        ctx.beginPath();
+        ctx.moveTo(mx, H - animal.groundHeight);
+        ctx.lineTo(mx + 10, H - animal.groundHeight - mh);
+        ctx.lineTo(mx + 120, H - animal.groundHeight - mh);
+        ctx.lineTo(mx + 130, H - animal.groundHeight);
+        ctx.closePath(); ctx.fill();
+      }
+      // Distant sauropod silhouette (prey too big for allosaurus here)
+      const sx = W * 0.65 + Math.sin(time * 0.01) * 8;
+      const sy = H - animal.groundHeight;
+      ctx.fillStyle = 'rgba(50, 35, 25, 0.6)';
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - 40, 32, 14, 0, 0, Math.PI*2); ctx.fill();
+      // Long neck
+      ctx.beginPath();
+      ctx.moveTo(sx + 20, sy - 42);
+      ctx.quadraticCurveTo(sx + 45, sy - 75, sx + 55, sy - 90);
+      ctx.lineTo(sx + 58, sy - 88);
+      ctx.quadraticCurveTo(sx + 48, sy - 72, sx + 24, sy - 38);
+      ctx.closePath(); ctx.fill();
+      // Small head
+      ctx.beginPath();
+      ctx.ellipse(sx + 58, sy - 90, 6, 4, 0, 0, Math.PI*2); ctx.fill();
+      // Tail
+      ctx.beginPath();
+      ctx.moveTo(sx - 25, sy - 40);
+      ctx.quadraticCurveTo(sx - 50, sy - 44, sx - 70, sy - 34);
+      ctx.lineTo(sx - 70, sy - 32);
+      ctx.quadraticCurveTo(sx - 50, sy - 40, sx - 25, sy - 38);
+      ctx.closePath(); ctx.fill();
+      // Legs
+      ctx.fillRect(sx - 18, sy - 30, 5, 30);
+      ctx.fillRect(sx - 4, sy - 30, 5, 30);
+      ctx.fillRect(sx + 10, sy - 30, 5, 30);
+      ctx.fillRect(sx + 24, sy - 30, 5, 30);
+      // Dry conifers
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 320 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a2818';
+        ctx.fillRect(tx, ty - 80, 5, 80);
+        ctx.fillStyle = '#5a6a38';
+        for (let j = 0; j < 3; j++) {
+          ctx.beginPath();
+          ctx.moveTo(tx - 20 + j * 2, ty - 35 - j * 14);
+          ctx.lineTo(tx + 2, ty - 60 - j * 14);
+          ctx.lineTo(tx + 24 - j * 2, ty - 35 - j * 14);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      // Dry ground cracks
+      ctx.strokeStyle = 'rgba(60, 40, 20, 0.5)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 10; i++) {
+        const cx = ((i * 130 + time * 0.6) % (W + 80)) - 40;
+        const cy = H - animal.groundHeight + 15;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + 12, cy + 5); ctx.lineTo(cx + 20, cy + 2);
+        ctx.stroke();
+      }
+      // Sparse ferns
+      ctx.strokeStyle = '#4a5a28'; ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const fx = ((i * 220 + time * 0.5) % (W + 120)) - 60;
+        const fy = H - animal.groundHeight;
+        for (let j = -1; j <= 1; j++) {
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.quadraticCurveTo(fx + j * 6, fy - 10, fx + j * 10, fy - 16);
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+    case 'mosasaurus': {
+      // Bright water surface with caustics
+      ctx.fillStyle = 'rgba(180, 220, 240, 0.35)';
+      ctx.fillRect(0, 0, W, 30);
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < W; i += 6) {
+        const y = 28 + Math.sin(i * 0.05 + time * 0.06) * 4;
+        if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+      // Caustic light patterns on seabed
+      ctx.strokeStyle = 'rgba(255, 255, 220, 0.25)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 8; i++) {
+        const cx = (i * 130 + time * 0.4) % (W + 120) - 60;
+        const cy = H - animal.groundHeight + 6;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.quadraticCurveTo(cx + 30, cy - 2 + Math.sin(time * 0.05 + i) * 3, cx + 60, cy);
+        ctx.stroke();
+      }
+      // Distant elasmosaur silhouette (long-necked plesiosaur)
+      const ex = W * 0.72 + Math.sin(time * 0.012) * 15;
+      const ey = 80 + Math.sin(time * 0.02) * 8;
+      ctx.fillStyle = 'rgba(20, 50, 60, 0.55)';
+      // Body
+      ctx.beginPath(); ctx.ellipse(ex, ey, 26, 10, 0, 0, Math.PI*2); ctx.fill();
+      // Long S-neck
+      ctx.beginPath();
+      ctx.moveTo(ex + 20, ey - 2);
+      ctx.bezierCurveTo(ex + 50, ey - 20, ex + 70, ey + 10, ex + 95, ey - 15);
+      ctx.lineTo(ex + 98, ey - 12);
+      ctx.bezierCurveTo(ex + 72, ey + 14, ex + 52, ey - 16, ex + 22, ey + 2);
+      ctx.closePath(); ctx.fill();
+      // Small head
+      ctx.beginPath(); ctx.ellipse(ex + 97, ey - 14, 6, 3, 0.1, 0, Math.PI*2); ctx.fill();
+      // Tail
+      ctx.beginPath();
+      ctx.moveTo(ex - 22, ey - 2);
+      ctx.quadraticCurveTo(ex - 42, ey, ex - 55, ey + 2);
+      ctx.lineTo(ex - 55, ey + 5);
+      ctx.quadraticCurveTo(ex - 42, ey + 4, ex - 22, ey + 2);
+      ctx.closePath(); ctx.fill();
+      // Flippers
+      ctx.beginPath(); ctx.ellipse(ex - 8, ey + 10, 12, 4, 0.3, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(ex + 8, ey + 11, 10, 4, -0.3, 0, Math.PI*2); ctx.fill();
+      // Fish school (small darting silhouettes)
+      ctx.fillStyle = 'rgba(220, 230, 200, 0.7)';
+      for (let i = 0; i < 12; i++) {
+        const fx = ((i * 67 + time * 1.2) % (W + 80)) - 40;
+        const fy = H * 0.35 + Math.sin(time * 0.08 + i) * 15 + (i % 3) * 12;
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, 3, 1.2, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(fx + 3, fy); ctx.lineTo(fx + 5, fy - 1); ctx.lineTo(fx + 5, fy + 1);
+        ctx.closePath(); ctx.fill();
+      }
+      // Kelp on seabed
+      ctx.strokeStyle = 'rgba(30, 80, 60, 0.85)'; ctx.lineWidth = 4;
+      for (let i = 0; i < 6; i++) {
+        const kx = ((i * 200 + time * 0.35) % (W + 150)) - 75;
+        const ky = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(kx, ky);
+        for (let j = 0; j < 8; j++) {
+          ctx.lineTo(kx + Math.sin(time * 0.04 + j + i * 2) * 10, ky - j * 12);
+        }
+        ctx.stroke();
+        // Kelp fronds
+        ctx.fillStyle = 'rgba(40, 100, 70, 0.7)';
+        for (let j = 1; j < 6; j++) {
+          const fx2 = kx + Math.sin(time * 0.04 + j + i * 2) * 10;
+          const fy2 = ky - j * 12;
+          ctx.beginPath();
+          ctx.ellipse(fx2 + 5, fy2, 5, 2, 0.2, 0, Math.PI*2); ctx.fill();
+        }
+      }
+      // Rock outcrops on seabed
+      ctx.fillStyle = '#2a3848';
+      for (let i = 0; i < 4; i++) {
+        const rx = ((i * 340 + time * 0.3) % (W + 200)) - 100;
+        const ry = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(rx - 20, ry);
+        ctx.quadraticCurveTo(rx - 15, ry - 18, rx, ry - 22);
+        ctx.quadraticCurveTo(rx + 18, ry - 14, rx + 22, ry);
+        ctx.closePath(); ctx.fill();
+      }
+      break;
+    }
+    case 'elasmosaurus': {
+      // Bright tropical water surface
+      ctx.fillStyle = 'rgba(200, 230, 240, 0.5)';
+      ctx.fillRect(0, 0, W, 32);
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < W; i += 5) {
+        const y = 28 + Math.sin(i * 0.06 + time * 0.07) * 4;
+        if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+      // Pteranodon silhouettes above water surface
+      ctx.fillStyle = 'rgba(30, 50, 70, 0.55)';
+      for (let i = 0; i < 3; i++) {
+        const px = ((i * 260 + time * 0.8) % (W + 200)) - 100;
+        const py = 8 + i * 5 + Math.sin(time * 0.03 + i) * 2;
+        const wflap = Math.sin(time * 0.1 + i) * 3;
+        // Wings (V shape)
+        ctx.beginPath();
+        ctx.moveTo(px - 22, py - wflap);
+        ctx.quadraticCurveTo(px - 12, py + 1, px, py);
+        ctx.quadraticCurveTo(px + 12, py + 1, px + 22, py - wflap);
+        ctx.lineTo(px + 20, py + 1 - wflap);
+        ctx.quadraticCurveTo(px + 10, py + 3, px, py + 2);
+        ctx.quadraticCurveTo(px - 10, py + 3, px - 20, py + 1 - wflap);
+        ctx.closePath(); ctx.fill();
+        // Head crest
+        ctx.beginPath();
+        ctx.moveTo(px - 3, py); ctx.lineTo(px - 7, py - 3); ctx.lineTo(px + 1, py + 1);
+        ctx.closePath(); ctx.fill();
+      }
+      // Caustic light rays
+      ctx.fillStyle = 'rgba(255, 255, 220, 0.08)';
+      for (let i = 0; i < 5; i++) {
+        ctx.save();
+        ctx.translate(i * W / 5 + Math.sin(time * 0.005 + i) * 50, 0);
+        ctx.rotate(-0.12);
+        ctx.fillRect(0, 0, 60, H);
+        ctx.restore();
+      }
+      // Belemnite school in distance (small)
+      ctx.fillStyle = 'rgba(120, 80, 140, 0.45)';
+      for (let i = 0; i < 14; i++) {
+        const bx = ((i * 57 + time * 0.9) % (W + 80)) - 40;
+        const by = H * 0.55 + Math.sin(time * 0.05 + i) * 18 + (i % 4) * 10;
+        ctx.beginPath();
+        ctx.ellipse(bx, by, 3, 1.2, 0, 0, Math.PI*2); ctx.fill();
+      }
+      // Distant ammonites drifting
+      ctx.fillStyle = 'rgba(140, 100, 70, 0.4)';
+      for (let i = 0; i < 4; i++) {
+        const ax = ((i * 320 + time * 0.3) % (W + 150)) - 75;
+        const ay = H * 0.4 + Math.sin(time * 0.02 + i) * 25;
+        ctx.beginPath();
+        ctx.arc(ax, ay, 8, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(90, 65, 45, 0.5)';
+        ctx.beginPath();
+        ctx.arc(ax - 1, ay - 1, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(140, 100, 70, 0.4)';
+      }
+      // Soft coral on seabed
+      ctx.fillStyle = '#e08a68';
+      for (let i = 0; i < 5; i++) {
+        const cx = ((i * 230 + time * 0.4) % (W + 150)) - 75;
+        const cy = H - animal.groundHeight;
+        // Branching coral
+        for (let j = 0; j < 5; j++) {
+          const bx = cx + (j - 2) * 4;
+          const by = cy - 10 - j * 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.quadraticCurveTo(bx, cy - 8, bx + Math.sin(time * 0.04 + j) * 2, by - 12);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = j % 2 ? '#e08a68' : '#d8685a';
+          ctx.stroke();
+          // Tip knob
+          ctx.fillStyle = j % 2 ? '#f0a888' : '#e8887a';
+          ctx.beginPath();
+          ctx.arc(bx + Math.sin(time * 0.04 + j) * 2, by - 12, 2.5, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      // Sea grass (flat shallow look)
+      ctx.strokeStyle = 'rgba(80, 140, 90, 0.75)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 14; i++) {
+        const gx = ((i * 110 + time * 0.55) % (W + 80)) - 40;
+        const gy = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx + Math.sin(time * 0.06 + i) * 4, gy - 15, gx + 2, gy - 28);
+        ctx.stroke();
+      }
+      // Sand ripples on seabed
+      ctx.strokeStyle = 'rgba(255, 240, 200, 0.25)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 10; i++) {
+        const sx = ((i * 140 + time * 0.3) % (W + 80)) - 40;
+        const sy = H - animal.groundHeight + 20;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.quadraticCurveTo(sx + 20, sy - 3, sx + 40, sy);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'diplodocus': {
+      // Distant misty mountains
+      ctx.fillStyle = 'rgba(110, 130, 90, 0.45)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 30) {
+        ctx.lineTo(i, H - animal.groundHeight - 70 - Math.sin(i * 0.005) * 35 - Math.cos(i * 0.012) * 15);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Closer hills
+      ctx.fillStyle = 'rgba(80, 100, 60, 0.55)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 20) {
+        ctx.lineTo(i, H - animal.groundHeight - 35 - Math.sin(i * 0.008 + 1) * 18);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Distant herd of fellow sauropods
+      ctx.fillStyle = 'rgba(50, 40, 30, 0.5)';
+      const herd = [
+        { x: W * 0.15, y: H - animal.groundHeight - 38, scale: 0.7 },
+        { x: W * 0.55, y: H - animal.groundHeight - 30, scale: 0.55 },
+        { x: W * 0.82, y: H - animal.groundHeight - 36, scale: 0.65 }
+      ];
+      herd.forEach((h, idx) => {
+        const sw = Math.sin(time * 0.01 + idx) * 3;
+        const cx = h.x + sw, cy = h.y, sc = h.scale;
+        // Body
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 28 * sc, 11 * sc, 0, 0, Math.PI*2); ctx.fill();
+        // Long neck
+        ctx.beginPath();
+        ctx.moveTo(cx + 22 * sc, cy - 2 * sc);
+        ctx.bezierCurveTo(cx + 50 * sc, cy - 30 * sc, cx + 70 * sc, cy - 50 * sc, cx + 80 * sc, cy - 70 * sc);
+        ctx.lineTo(cx + 84 * sc, cy - 68 * sc);
+        ctx.bezierCurveTo(cx + 73 * sc, cy - 48 * sc, cx + 53 * sc, cy - 28 * sc, cx + 25 * sc, cy);
+        ctx.closePath(); ctx.fill();
+        // Tiny head
+        ctx.beginPath();
+        ctx.ellipse(cx + 84 * sc, cy - 70 * sc, 5 * sc, 3 * sc, 0.1, 0, Math.PI*2); ctx.fill();
+        // Long tail
+        ctx.beginPath();
+        ctx.moveTo(cx - 22 * sc, cy - 1 * sc);
+        ctx.quadraticCurveTo(cx - 55 * sc, cy - 5 * sc, cx - 85 * sc, cy + 4 * sc);
+        ctx.lineTo(cx - 85 * sc, cy + 6 * sc);
+        ctx.quadraticCurveTo(cx - 55 * sc, cy - 1 * sc, cx - 22 * sc, cy + 3 * sc);
+        ctx.closePath(); ctx.fill();
+        // Legs
+        ctx.fillRect(cx - 18 * sc, cy + 8 * sc, 4 * sc, 26 * sc);
+        ctx.fillRect(cx - 4 * sc, cy + 8 * sc, 4 * sc, 26 * sc);
+        ctx.fillRect(cx + 8 * sc, cy + 8 * sc, 4 * sc, 26 * sc);
+        ctx.fillRect(cx + 20 * sc, cy + 8 * sc, 4 * sc, 26 * sc);
+      });
+      // Tall conifers (Araucaria style)
+      for (let i = 0; i < 5; i++) {
+        const tx = ((i * 280 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a2818';
+        ctx.fillRect(tx, ty - 130, 7, 130);
+        // Layered branches
+        ctx.fillStyle = '#3a6a38';
+        for (let j = 0; j < 5; j++) {
+          ctx.beginPath();
+          ctx.moveTo(tx - 30 + j * 4, ty - 50 - j * 16);
+          ctx.lineTo(tx + 4, ty - 80 - j * 16);
+          ctx.lineTo(tx + 38 - j * 4, ty - 50 - j * 16);
+          ctx.closePath(); ctx.fill();
+        }
+        // Top tuft
+        ctx.beginPath();
+        ctx.arc(tx + 4, ty - 138, 7, 0, Math.PI*2); ctx.fill();
+      }
+      // Tree ferns / cycads in midground
+      for (let i = 0; i < 7; i++) {
+        const fx = ((i * 180 + time * 0.6) % (W + 100)) - 50;
+        const fy = H - animal.groundHeight;
+        // Trunk
+        ctx.fillStyle = '#5a3a20';
+        ctx.fillRect(fx - 1, fy - 30, 3, 30);
+        // Frond crown
+        ctx.strokeStyle = '#4a8a38'; ctx.lineWidth = 2.5;
+        for (let j = -3; j <= 3; j++) {
+          ctx.beginPath();
+          ctx.moveTo(fx, fy - 30);
+          ctx.quadraticCurveTo(fx + j * 6, fy - 38, fx + j * 12, fy - 36);
+          ctx.stroke();
+        }
+      }
+      // Pollen / dust motes drifting in air
+      ctx.fillStyle = 'rgba(255, 245, 200, 0.45)';
+      for (let i = 0; i < 18; i++) {
+        const px = ((i * 80 + time * 0.4) % (W + 40)) - 20;
+        const py = (Math.sin(time * 0.02 + i) * 30 + i * 18) % (H - 60) + 20;
+        ctx.beginPath();
+        ctx.arc(px, py, 1.2, 0, Math.PI*2); ctx.fill();
+      }
+      // Foreground horsetails
+      ctx.strokeStyle = '#3a5028'; ctx.lineWidth = 1.8;
+      for (let i = 0; i < 22; i++) {
+        const hx = ((i * 70 + time * 0.7) % (W + 60)) - 30;
+        const hy = H - animal.groundHeight;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy + 8);
+        ctx.lineTo(hx + Math.sin(time * 0.04 + i) * 1.5, hy - 18);
+        ctx.stroke();
+        // Joint marks
+        ctx.fillStyle = '#5a7038';
+        ctx.fillRect(hx - 1, hy - 6, 2, 1);
+        ctx.fillRect(hx - 1, hy - 14, 2, 1);
+      }
+      break;
+    }
+    case 'coelophysis': {
+      // Distant red rock spires (Ghost Ranch style)
+      ctx.fillStyle = 'rgba(140, 60, 35, 0.55)';
+      for (let i = 0; i < 4; i++) {
+        const sx = i * W / 4 + 30;
+        const sh = 90 + (i % 2) * 30;
+        ctx.beginPath();
+        ctx.moveTo(sx, H - animal.groundHeight);
+        ctx.lineTo(sx + 18, H - animal.groundHeight - sh);
+        ctx.lineTo(sx + 22, H - animal.groundHeight - sh - 15);
+        ctx.lineTo(sx + 30, H - animal.groundHeight - sh + 5);
+        ctx.lineTo(sx + 80, H - animal.groundHeight - sh + 10);
+        ctx.lineTo(sx + 92, H - animal.groundHeight);
+        ctx.closePath(); ctx.fill();
+        // Strata lines
+        ctx.strokeStyle = 'rgba(80, 30, 15, 0.5)'; ctx.lineWidth = 1;
+        for (let j = 0; j < 4; j++) {
+          const ly = H - animal.groundHeight - 20 - j * (sh / 5);
+          ctx.beginPath();
+          ctx.moveTo(sx + 18 + j * 2, ly);
+          ctx.lineTo(sx + 88 - j * 2, ly);
+          ctx.stroke();
+        }
+      }
+      // Closer mesas
+      ctx.fillStyle = 'rgba(170, 80, 40, 0.65)';
+      for (let i = 0; i < 3; i++) {
+        const mx = (i * W / 3) + W / 6;
+        const mh = 50;
+        ctx.beginPath();
+        ctx.moveTo(mx - 50, H - animal.groundHeight);
+        ctx.lineTo(mx - 40, H - animal.groundHeight - mh);
+        ctx.lineTo(mx + 40, H - animal.groundHeight - mh);
+        ctx.lineTo(mx + 50, H - animal.groundHeight);
+        ctx.closePath(); ctx.fill();
+      }
+      // Sun/heat haze
+      ctx.fillStyle = 'rgba(255, 220, 180, 0.5)';
+      ctx.beginPath();
+      ctx.arc(W * 0.78, 60, 26, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255, 245, 220, 0.7)';
+      ctx.beginPath();
+      ctx.arc(W * 0.78, 60, 18, 0, Math.PI*2); ctx.fill();
+      // Pack mates (other Coelophysis silhouettes - they hunted in groups)
+      ctx.fillStyle = 'rgba(80, 40, 20, 0.55)';
+      const pack = [
+        { x: W * 0.18, y: H - animal.groundHeight - 12, sc: 0.4 },
+        { x: W * 0.42, y: H - animal.groundHeight - 14, sc: 0.5 },
+        { x: W * 0.88, y: H - animal.groundHeight - 11, sc: 0.45 }
+      ];
+      pack.forEach((p, idx) => {
+        const run = Math.sin(time * 0.15 + idx) * 2;
+        const cx = p.x, cy = p.y, sc = p.sc;
+        // Body
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 18 * sc, 7 * sc, -0.1, 0, Math.PI*2); ctx.fill();
+        // Tail
+        ctx.beginPath();
+        ctx.moveTo(cx - 14 * sc, cy);
+        ctx.quadraticCurveTo(cx - 30 * sc, cy - 6 * sc + run, cx - 44 * sc, cy + run);
+        ctx.lineTo(cx - 44 * sc, cy + 2 * sc + run);
+        ctx.quadraticCurveTo(cx - 30 * sc, cy - 2 * sc + run, cx - 14 * sc, cy + 4 * sc);
+        ctx.closePath(); ctx.fill();
+        // Neck and head
+        ctx.beginPath();
+        ctx.moveTo(cx + 12 * sc, cy - 2 * sc);
+        ctx.bezierCurveTo(cx + 18 * sc, cy - 12 * sc, cx + 22 * sc, cy - 18 * sc, cx + 28 * sc, cy - 18 * sc);
+        ctx.lineTo(cx + 32 * sc, cy - 16 * sc);
+        ctx.bezierCurveTo(cx + 22 * sc, cy - 14 * sc, cx + 18 * sc, cy - 8 * sc, cx + 14 * sc, cy);
+        ctx.closePath(); ctx.fill();
+        // Head
+        ctx.beginPath();
+        ctx.ellipse(cx + 30 * sc, cy - 17 * sc, 5 * sc, 2.5 * sc, 0, 0, Math.PI*2); ctx.fill();
+        // Legs (running)
+        ctx.fillRect(cx - 4 * sc + run, cy + 5 * sc, 1.5 * sc, 14 * sc);
+        ctx.fillRect(cx + 4 * sc - run, cy + 5 * sc, 1.5 * sc, 14 * sc);
+      });
+      // Sparse Triassic conifers (tall and lean)
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 320 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(tx, ty - 90, 4, 90);
+        ctx.fillStyle = '#5a6a30';
+        for (let j = 0; j < 3; j++) {
+          ctx.beginPath();
+          ctx.moveTo(tx - 14 + j * 1, ty - 40 - j * 16);
+          ctx.lineTo(tx + 2, ty - 60 - j * 16);
+          ctx.lineTo(tx + 18 - j * 1, ty - 40 - j * 16);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      // Skeletal remains scattered (Coelophysis fossil bonebed reference)
+      ctx.fillStyle = 'rgba(220, 200, 170, 0.65)';
+      for (let i = 0; i < 6; i++) {
+        const bx = ((i * 230 + time * 0.5) % (W + 100)) - 50;
+        const by = H - animal.groundHeight + 22;
+        // Rib bones
+        for (let j = 0; j < 4; j++) {
+          ctx.beginPath();
+          ctx.ellipse(bx + j * 6, by, 1.5, 4, 0, 0, Math.PI*2); ctx.fill();
+        }
+        // Spine
+        ctx.fillRect(bx, by - 1, 24, 1.5);
+      }
+      // Cracked dry earth
+      ctx.strokeStyle = 'rgba(80, 30, 15, 0.55)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 12; i++) {
+        const cx = ((i * 130 + time * 0.6) % (W + 80)) - 40;
+        const cy = H - animal.groundHeight + 18;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + 10, cy + 4); ctx.lineTo(cx + 18, cy + 1); ctx.lineTo(cx + 26, cy + 5);
+        ctx.stroke();
+      }
+      // Dust kicked up (faster animal, more dust)
+      ctx.fillStyle = 'rgba(200, 140, 90, 0.35)';
+      for (let i = 0; i < 12; i++) {
+        const dx = ((i * 60 + time * 1.2) % (W + 40)) - 20;
+        const dy = H - animal.groundHeight - 5 + Math.sin(time * 0.1 + i) * 4;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 2 + Math.sin(time * 0.05 + i), 0, Math.PI*2); ctx.fill();
+      }
+      break;
+    }
+    case 'ceratosaurus': {
+      // Distant cliffs (sandstone reds and tans)
+      ctx.fillStyle = 'rgba(120, 90, 60, 0.6)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W; i += 24) {
+        ctx.lineTo(i, H - animal.groundHeight - 60 - Math.sin(i * 0.007) * 30);
+      }
+      ctx.lineTo(W, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // River across the midground
+      const riverY = H - animal.groundHeight + 20;
+      ctx.fillStyle = 'rgba(80, 110, 130, 0.55)';
+      ctx.fillRect(0, riverY - 8, W, 12);
+      // River reflections / ripples
+      ctx.strokeStyle = 'rgba(220, 230, 240, 0.4)'; ctx.lineWidth = 1.2;
+      for (let i = 0; i < 12; i++) {
+        const rx = ((i * 130 + time * 0.7) % (W + 60)) - 30;
+        ctx.beginPath();
+        ctx.moveTo(rx, riverY - 4);
+        ctx.quadraticCurveTo(rx + 10, riverY - 6, rx + 20, riverY - 4);
+        ctx.stroke();
+      }
+      // Reeds along riverbank
+      ctx.strokeStyle = '#3a5028'; ctx.lineWidth = 2;
+      for (let i = 0; i < 14; i++) {
+        const rx = ((i * 90 + time * 0.6) % (W + 60)) - 30;
+        ctx.beginPath();
+        ctx.moveTo(rx, riverY - 4);
+        ctx.quadraticCurveTo(rx + Math.sin(time * 0.04 + i) * 3, riverY - 22, rx + 1, riverY - 38);
+        ctx.stroke();
+      }
+      // Tree ferns
+      for (let i = 0; i < 5; i++) {
+        const tx = ((i * 280 + time * 0.45) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a2818';
+        ctx.fillRect(tx - 1, ty - 50, 3, 50);
+        ctx.strokeStyle = '#3a6a30'; ctx.lineWidth = 2.5;
+        for (let j = -3; j <= 3; j++) {
+          ctx.beginPath();
+          ctx.moveTo(tx, ty - 50);
+          ctx.quadraticCurveTo(tx + j * 8, ty - 60, tx + j * 18, ty - 56);
+          ctx.stroke();
+        }
+      }
+      // A small distant Stegosaurus silhouette (Morrison fauna companion)
+      const stx = W * 0.7;
+      const sty = H - animal.groundHeight - 8;
+      ctx.fillStyle = 'rgba(60, 50, 30, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(stx, sty, 22, 8, 0, 0, Math.PI*2); ctx.fill();
+      // Plates
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(stx - 14 + i * 6, sty - 6);
+        ctx.lineTo(stx - 12 + i * 6, sty - 14);
+        ctx.lineTo(stx - 10 + i * 6, sty - 6);
+        ctx.closePath(); ctx.fill();
+      }
+      // Legs
+      ctx.fillRect(stx - 12, sty + 4, 3, 8);
+      ctx.fillRect(stx - 4, sty + 4, 3, 8);
+      ctx.fillRect(stx + 6, sty + 4, 3, 8);
+      ctx.fillRect(stx + 14, sty + 4, 3, 8);
+      // Small head
+      ctx.beginPath();
+      ctx.ellipse(stx + 22, sty + 2, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+      // Mossy ground patches
+      ctx.fillStyle = 'rgba(70, 90, 50, 0.6)';
+      for (let i = 0; i < 10; i++) {
+        const mx = ((i * 150 + time * 0.55) % (W + 80)) - 40;
+        const my = H - animal.groundHeight + 18;
+        ctx.beginPath();
+        ctx.ellipse(mx, my, 12, 2.5, 0, 0, Math.PI*2); ctx.fill();
+      }
+      break;
+    }
+    case 'carnotaurus': {
+      // Distant Patagonian volcano
+      ctx.fillStyle = 'rgba(80, 50, 40, 0.7)';
+      const vx = W * 0.78;
+      ctx.beginPath();
+      ctx.moveTo(vx - 90, H - animal.groundHeight);
+      ctx.lineTo(vx - 25, H - animal.groundHeight - 110);
+      ctx.lineTo(vx - 10, H - animal.groundHeight - 105);
+      ctx.lineTo(vx + 10, H - animal.groundHeight - 115);
+      ctx.lineTo(vx + 25, H - animal.groundHeight - 100);
+      ctx.lineTo(vx + 90, H - animal.groundHeight);
+      ctx.closePath(); ctx.fill();
+      // Volcano smoke
+      ctx.fillStyle = 'rgba(80, 60, 50, 0.5)';
+      for (let i = 0; i < 5; i++) {
+        const px = vx + Math.sin(time * 0.02 + i) * 8;
+        const py = H - animal.groundHeight - 120 - i * 22;
+        ctx.beginPath();
+        ctx.arc(px, py, 14 + i * 4, 0, Math.PI*2); ctx.fill();
+      }
+      // Other Patagonian hills
+      ctx.fillStyle = 'rgba(110, 70, 50, 0.6)';
+      ctx.beginPath();
+      ctx.moveTo(0, H - animal.groundHeight);
+      for (let i = 0; i <= W * 0.6; i += 22) {
+        ctx.lineTo(i, H - animal.groundHeight - 50 - Math.sin(i * 0.008) * 22);
+      }
+      ctx.lineTo(W * 0.6, H - animal.groundHeight); ctx.closePath(); ctx.fill();
+      // Distant titanosaur herd (parent and babies)
+      ctx.fillStyle = 'rgba(70, 50, 35, 0.55)';
+      const titans = [
+        { x: W * 0.18, sc: 0.85, isBaby: false },
+        { x: W * 0.3, sc: 0.35, isBaby: true },
+        { x: W * 0.46, sc: 0.4, isBaby: true }
+      ];
+      titans.forEach(t2 => {
+        const cx = t2.x + Math.sin(time * 0.01 + t2.x * 0.01) * 3;
+        const cy = H - animal.groundHeight - (t2.isBaby ? 12 : 30);
+        const sc = t2.sc;
+        // Body
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 28 * sc, 11 * sc, 0, 0, Math.PI*2); ctx.fill();
+        // Long neck
+        ctx.beginPath();
+        ctx.moveTo(cx + 22 * sc, cy - 2 * sc);
+        ctx.bezierCurveTo(cx + 45 * sc, cy - 30 * sc, cx + 60 * sc, cy - 50 * sc, cx + 70 * sc, cy - 65 * sc);
+        ctx.lineTo(cx + 73 * sc, cy - 63 * sc);
+        ctx.bezierCurveTo(cx + 63 * sc, cy - 48 * sc, cx + 48 * sc, cy - 28 * sc, cx + 25 * sc, cy);
+        ctx.closePath(); ctx.fill();
+        // Head
+        ctx.beginPath();
+        ctx.ellipse(cx + 73 * sc, cy - 65 * sc, 5 * sc, 3 * sc, 0, 0, Math.PI*2); ctx.fill();
+        // Tail
+        ctx.beginPath();
+        ctx.moveTo(cx - 22 * sc, cy);
+        ctx.quadraticCurveTo(cx - 50 * sc, cy - 4 * sc, cx - 75 * sc, cy + 4 * sc);
+        ctx.lineTo(cx - 75 * sc, cy + 6 * sc);
+        ctx.quadraticCurveTo(cx - 50 * sc, cy, cx - 22 * sc, cy + 3 * sc);
+        ctx.closePath(); ctx.fill();
+        // Legs
+        ctx.fillRect(cx - 16 * sc, cy + 8 * sc, 4 * sc, 22 * sc);
+        ctx.fillRect(cx - 4 * sc, cy + 8 * sc, 4 * sc, 22 * sc);
+        ctx.fillRect(cx + 8 * sc, cy + 8 * sc, 4 * sc, 22 * sc);
+        ctx.fillRect(cx + 18 * sc, cy + 8 * sc, 4 * sc, 22 * sc);
+      });
+      // Araucaria trees (Patagonian conifers)
+      for (let i = 0; i < 4; i++) {
+        const tx = ((i * 320 + time * 0.4) % (W + 200)) - 100;
+        const ty = H - animal.groundHeight;
+        ctx.fillStyle = '#3a2010';
+        ctx.fillRect(tx, ty - 100, 5, 100);
+        // Wide flat-topped Araucaria crown
+        ctx.fillStyle = '#3a5828';
+        ctx.beginPath();
+        ctx.ellipse(tx + 2, ty - 102, 22, 8, 0, 0, Math.PI*2); ctx.fill();
+        // Spiky branch tufts
+        for (let j = 0; j < 5; j++) {
+          ctx.beginPath();
+          ctx.arc(tx - 14 + j * 7, ty - 100, 4, 0, Math.PI*2); ctx.fill();
+        }
+      }
+      // Low scrub grass tufts (Patagonian steppe)
+      ctx.fillStyle = '#7a6038';
+      for (let i = 0; i < 16; i++) {
+        const gx = ((i * 100 + time * 0.5) % (W + 80)) - 40;
+        const gy = H - animal.groundHeight + 14;
+        ctx.beginPath();
+        ctx.ellipse(gx, gy, 6, 2, 0, 0, Math.PI*2); ctx.fill();
+        // Tufts of grass blades
+        ctx.strokeStyle = '#9a7a48'; ctx.lineWidth = 1;
+        for (let j = -2; j <= 2; j++) {
+          ctx.beginPath();
+          ctx.moveTo(gx + j * 1.5, gy - 1);
+          ctx.lineTo(gx + j * 1.5, gy - 6);
+          ctx.stroke();
+        }
+      }
+      // Heat shimmer / dust haze
+      ctx.fillStyle = 'rgba(220, 150, 100, 0.18)';
+      for (let i = 0; i < 8; i++) {
+        const sx = ((i * 100 + time * 0.8) % (W + 60)) - 30;
+        const sy = H - animal.groundHeight - 8 + Math.sin(time * 0.06 + i) * 3;
+        ctx.beginPath();
+        ctx.ellipse(sx, sy, 30, 4, 0, 0, Math.PI*2); ctx.fill();
+      }
+      break;
+    }
+  }
+}
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  drawBackground();
+
+  const scl = animalScale(animal);
+  const actionLevel = player.actionTimer > 0 ? Math.min(1, player.actionTimer / 15) : 0;
+
+  // Draw items behind player if further
+  items.forEach(it => it.draw(ctx, it, time));
+
+  // Draw player
+  animal.draw(ctx, player.x, player.y, scl, player.facing, actionLevel, time);
+
+  // Action radius visual
+  if (actionLevel > 0.3) {
+    ctx.strokeStyle = `rgba(255, 255, 180, ${actionLevel * 0.4})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(player.x + player.facing * actionLevel * 30,
+            player.y - (animalKey === 'frog' ? actionLevel * 20 :
+                        animalKey === 'elephant' ? actionLevel * 30 : 0),
+            player.catchRadius + actionLevel * 45, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // Particles
+  particles.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life / 45;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+// ---------- LOOP ----------
+
+function loop() {
+  if (state === 'play') {
+    update();
+    render();
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+
+// ---------- MENU ----------
+
+function buildMenu() {
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+  Object.keys(ANIMALS).forEach(key => {
+    const a = ANIMALS[key];
+    const card = document.createElement('div');
+    card.className = 'card';
+    const cv = document.createElement('canvas');
+    cv.width = 180; cv.height = 100;
+    const label = document.createElement('span');
+    label.textContent = a.name;
+    card.appendChild(cv);
+    card.appendChild(label);
+    cards.appendChild(card);
+
+    const cc = cv.getContext('2d');
+    cc.clearRect(0, 0, 180, 100);
+    // Mini scene bg
+    const g = cc.createLinearGradient(0, 0, 0, 100);
+    g.addColorStop(0, a.bgSky);
+    g.addColorStop(1, a.bgSky2 || a.bgSky);
+    cc.fillStyle = g;
+    cc.fillRect(0, 0, 180, 100);
+    // Ground hint
+    if (!a.canSwim) {
+      cc.fillStyle = a.bgGround;
+      cc.fillRect(0, 85, 180, 15);
+    }
+    // Draw animal
+    a.draw(cc, 90, 65, 0.7, 1, 0, 0);
+
+    card.addEventListener('click', () => startGame(key));
+  });
+}
+
+buildMenu();
+</script>
+</body>
+</html>
